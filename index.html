@@ -1,1 +1,383 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spendi - Your Smart Hisaab Partner</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="light-theme">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="logo">Spendi</h1>
+            <p class="tagline">Your Smart Hisaab Partner</p>
+            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
+                <span class="theme-icon">🌙</span>
+            </button>
+        </header>
+
+        <!-- Summary Cards -->
+        <section class="summary">
+            <div class="summary-card">
+                <h3>Personal Expenses</h3>
+                <p class="amount" id="personalExpenses">₹0</p>
+                <span class="period">This Month</span>
+            </div>
+            <div class="summary-card owe">
+                <h3>You Owe</h3>
+                <p class="amount" id="youOwe">₹0</p>
+                <span class="period">Total</span>
+            </div>
+            <div class="summary-card owed">
+                <h3>Others Owe You</h3>
+                <p class="amount" id="othersOwe">₹0</p>
+                <span class="period">Total</span>
+            </div>
+        </section>
+
+        <!-- Friends Count Section -->
+        <section class="friends-count">
+            <div class="friends-card">
+                <h3>Friends</h3>
+                <p class="count" id="friendsCount">0</p>
+                <span class="label">Total Friends</span>
+            </div>
+        </section>
+
+        <!-- Action Buttons -->
+        <section class="actions">
+            <button class="btn btn-primary" onclick="openExpenseModal()">Add Expense</button>
+            <button class="btn btn-secondary" onclick="openFriendModal()">Add Friend</button>
+            <button class="btn btn-tertiary" onclick="openFriendsManagementModal()">Manage Friends</button>
+            <button class="btn btn-quaternary" onclick="openExpenseHistoryModal()">View History</button>
+        </section>
+
+        <!-- Balances Section -->
+        <section class="balances">
+            <h2>Balances</h2>
+            <div id="balancesList" class="balances-list">
+                <p class="no-data">No balances yet. Add some friends and expenses!</p>
+            </div>
+        </section>
+
+        <!-- Recent Expenses -->
+        <section class="recent-expenses">
+            <h2>Recent Expenses</h2>
+            <div id="expensesList" class="expenses-list">
+                <p class="no-data">No expenses yet. Start tracking your spending!</p>
+            </div>
+        </section>
+    </div>
+
+    <!-- Add Expense Modal -->
+    <div id="expenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Expense</h2>
+                <span class="close" onclick="closeExpenseModal()">&times;</span>
+            </div>
+            <form id="expenseForm" class="modal-form">
+                <div class="form-group">
+                    <label for="expenseTitle">Title</label>
+                    <input type="text" id="expenseTitle" required placeholder="e.g., Dinner at restaurant">
+                </div>
+                
+                <div class="form-group">
+                    <label for="expenseAmount">Amount (₹)</label>
+                    <input type="number" id="expenseAmount" required min="0" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label for="expenseDate">Date</label>
+                    <input type="date" id="expenseDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expenseCategory">Category</label>
+                    <select id="expenseCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Food & Dining">🍽️ Food & Dining</option>
+                        <option value="Groceries">🛒 Groceries</option>
+                        <option value="Travel">✈️ Travel</option>
+                        <option value="Transportation">🚗 Transportation</option>
+                        <option value="Shopping">🛍️ Shopping</option>
+                        <option value="Entertainment">🎬 Entertainment</option>
+                        <option value="Bills & Utilities">💡 Bills & Utilities</option>
+                        <option value="Rent & Housing">🏠 Rent & Housing</option>
+                        <option value="Medical & Health">🏥 Medical & Health</option>
+                        <option value="Education">📚 Education</option>
+                        <option value="Sports & Fitness">⚽ Sports & Fitness</option>
+                        <option value="Beauty & Personal Care">💄 Beauty & Personal Care</option>
+                        <option value="Gifts & Donations">🎁 Gifts & Donations</option>
+                        <option value="Insurance">🛡️ Insurance</option>
+                        <option value="Investments">📈 Investments</option>
+                        <option value="Subscriptions">📱 Subscriptions</option>
+                        <option value="Pet Care">🐕 Pet Care</option>
+                        <option value="Home & Garden">🏡 Home & Garden</option>
+                        <option value="Electronics">💻 Electronics</option>
+                        <option value="Clothing">👕 Clothing</option>
+                        <option value="Other">📝 Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="expensePaidBy">Paid By</label>
+                    <select id="expensePaidBy" required>
+                        <option value="You">You</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Split With</label>
+                    <div id="splitWithList" class="checkbox-list">
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="You" checked disabled>
+                            <span>You</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Friend Modal -->
+    <div id="friendModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Friend</h2>
+                <span class="close" onclick="closeFriendModal()">&times;</span>
+            </div>
+            <form id="friendForm" class="modal-form">
+                <div class="form-group">
+                    <label for="friendName">Friend's Name</label>
+                    <input type="text" id="friendName" required placeholder="Enter friend's name">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeFriendModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Friend</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Balance Details Modal after the existing modals -->
+    <!-- Balance Details Modal -->
+    <div id="balanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="balanceModalTitle">Balance Details</h2>
+                <span class="close" onclick="closeBalanceModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="balanceDetails" class="balance-details">
+                    <!-- Balance details will be populated here -->
+                </div>
+                <div class="balance-summary">
+                    <div class="summary-row">
+                        <span class="summary-label">Net Balance:</span>
+                        <span id="netBalance" class="summary-amount">₹0</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeBalanceModal()">Close</button>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" onclick="closeBalanceModal()">Close</button>
+                    <button class="btn btn-tertiary" onclick="openPartialSettlement()">Settle Selected</button>
+                    <button id="settleUpBtn" class="btn btn-primary" onclick="settleBalance()">Settle All</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Expense Modal -->
+    <div id="editExpenseModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Edit Expense</h2>
+                <span class="close" onclick="closeEditExpenseModal()">&times;</span>
+            </div>
+            <form id="editExpenseForm" class="modal-form">
+                <div class="form-group">
+                    <label for="editExpenseTitle">Title</label>
+                    <input type="text" id="editExpenseTitle" required placeholder="e.g., Dinner at restaurant">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editExpenseAmount">Amount (₹)</label>
+                    <input type="number" id="editExpenseAmount" required min="0" step="0.01" placeholder="0.00">
+                </div>
+                
+                <div class="form-group">
+                    <label for="editExpenseDate">Date</label>
+                    <input type="date" id="editExpenseDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editExpenseCategory">Category</label>
+                    <select id="editExpenseCategory" required>
+                        <option value="">Select Category</option>
+                        <option value="Food & Dining">🍽️ Food & Dining</option>
+                        <option value="Groceries">🛒 Groceries</option>
+                        <option value="Travel">✈️ Travel</option>
+                        <option value="Transportation">🚗 Transportation</option>
+                        <option value="Shopping">🛍️ Shopping</option>
+                        <option value="Entertainment">🎬 Entertainment</option>
+                        <option value="Bills & Utilities">💡 Bills & Utilities</option>
+                        <option value="Rent & Housing">🏠 Rent & Housing</option>
+                        <option value="Medical & Health">🏥 Medical & Health</option>
+                        <option value="Education">📚 Education</option>
+                        <option value="Sports & Fitness">⚽ Sports & Fitness</option>
+                        <option value="Beauty & Personal Care">💄 Beauty & Personal Care</option>
+                        <option value="Gifts & Donations">🎁 Gifts & Donations</option>
+                        <option value="Insurance">🛡️ Insurance</option>
+                        <option value="Investments">📈 Investments</option>
+                        <option value="Subscriptions">📱 Subscriptions</option>
+                        <option value="Pet Care">🐕 Pet Care</option>
+                        <option value="Home & Garden">🏡 Home & Garden</option>
+                        <option value="Electronics">💻 Electronics</option>
+                        <option value="Clothing">👕 Clothing</option>
+                        <option value="Other">📝 Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editExpensePaidBy">Paid By</label>
+                    <select id="editExpensePaidBy" required>
+                        <option value="You">You</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Split With</label>
+                    <div id="editSplitWithList" class="checkbox-list">
+                        <label class="checkbox-item">
+                            <input type="checkbox" value="You" checked disabled>
+                            <span>You</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="edit-history">
+                    <h4>Edit History</h4>
+                    <div id="editHistoryList" class="edit-history-list">
+                        <!-- Edit history will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" onclick="deleteExpense()">Delete</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditExpenseModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Friends Management Modal -->
+    <div id="friendsManagementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Manage Friends</h2>
+                <span class="close" onclick="closeFriendsManagementModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div id="friendsManagementList" class="friends-management-list">
+                    <!-- Friends list will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeFriendsManagementModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partial Settlement Modal -->
+    <div id="partialSettlementModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="partialSettlementTitle">Settle Expenses</h2>
+                <span class="close" onclick="closePartialSettlementModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="settlement-summary">
+                    <h3>Select expenses to settle with <span id="settlementFriendName"></span></h3>
+                    <p class="settlement-info">Choose which specific expenses you want to mark as settled. This will create a settlement record while keeping the original expense history intact.</p>
+                </div>
+                <div id="settlementExpensesList" class="settlement-expenses-list">
+                    <!-- Settlement expenses will be populated here -->
+                </div>
+                <div class="settlement-totals">
+                    <div class="total-row">
+                        <span>Selected Amount:</span>
+                        <span id="selectedSettlementAmount" class="amount">₹0.00</span>
+                    </div>
+                    <div class="total-row final-total">
+                        <span>Net Settlement:</span>
+                        <span id="netSettlementAmount" class="amount">₹0.00</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closePartialSettlementModal()">Cancel</button>
+                <button id="confirmPartialSettlement" class="btn btn-primary" onclick="confirmPartialSettlement()" disabled>Settle Selected</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Expense History Modal -->
+    <div id="expenseHistoryModal" class="modal">
+        <div class="modal-content large-modal">
+            <div class="modal-header">
+                <h2>Complete Expense History</h2>
+                <span class="close" onclick="closeExpenseHistoryModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="history-filters">
+                    <div class="filter-group">
+                        <label for="historyFilter">Filter by:</label>
+                        <select id="historyFilter" onchange="filterExpenseHistory()">
+                            <option value="all">All Records</option>
+                            <option value="expenses">Expenses Only</option>
+                            <option value="settlements">Settlements Only</option>
+                            <option value="edits">Edits Only</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="historyFriendFilter">Friend:</label>
+                        <select id="historyFriendFilter" onchange="filterExpenseHistory()">
+                            <option value="all">All Friends</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="historyDateFilter">Date Range:</label>
+                        <select id="historyDateFilter" onchange="filterExpenseHistory()">
+                            <option value="all">All Time</option>
+                            <option value="week">Last Week</option>
+                            <option value="month">Last Month</option>
+                            <option value="3months">Last 3 Months</option>
+                            <option value="year">Last Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="expenseHistoryList" class="expense-history-list">
+                    <!-- History will be populated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeExpenseHistoryModal()">Close</button>
+                <button class="btn btn-primary" onclick="exportHistory()">Export History</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
