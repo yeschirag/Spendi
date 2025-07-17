@@ -530,7 +530,6 @@ class SpendiApp {
     document.body.className = `${this.theme}-theme`
     this.saveToStorage("theme", this.theme)
     this.updateThemeIcon()
-    this.showNotification(`Switched to ${this.theme} mode`)
   }
 
   updateThemeIcon() {

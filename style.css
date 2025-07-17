@@ -238,7 +238,6 @@ body {
   box-shadow: var(--shadow);
   z-index: 1000;
   overflow: hidden;
-  position: relative;
 }
 
 .theme-toggle::before {
