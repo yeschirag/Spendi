@@ -546,23 +546,6 @@ body.light-theme {
   overflow: hidden;
 }
 
-.balances::before,
-.recent-expenses::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-  transition: left 0.8s;
-}
-
-.balances:hover::before,
-.recent-expenses:hover::before {
-  left: 100%;
-}
-
 .balances:hover,
 .recent-expenses:hover {
   box-shadow: var(--shadow-md);
