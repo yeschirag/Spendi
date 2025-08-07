@@ -1338,7 +1338,6 @@ function removeFriend(friendName) {
 function settleBalance() {
   // This will be handled by the onclick set in showBalanceDetails
 }
-
 function openPartialSettlement() {
   app.openPartialSettlement()
 }
