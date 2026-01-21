@@ -10,6 +10,7 @@ class SpendiApp {
     this.selectedSettlementExpenses = new Set()
     this.expenseHistory = this.loadFromStorage("expenseHistory") || []
     this.settlements = this.loadFromStorage("settlements") || []
+    this.spendingChart = null
     this.init()
   }
 
@@ -22,6 +23,9 @@ class SpendiApp {
     this.updateFriendsCount()
     this.setTodayDate()
     this.setupEventListeners()
+    this.initCharts()
+    this.updateCategoryBreakdown()
+    this.updateCurrentMonthBadge()
   }
 
   loadFromStorage(key) {
@@ -234,6 +238,8 @@ class SpendiApp {
     this.updateSummary()
     this.updateBalancesList()
     this.updateExpensesList()
+    this.updateSpendingChart()
+    this.updateCategoryBreakdown()
     this.closeExpenseModal()
 
     // Reset form
@@ -390,6 +396,8 @@ class SpendiApp {
     this.updateSummary()
     this.updateBalancesList()
     this.updateExpensesList()
+    this.updateSpendingChart()
+    this.updateCategoryBreakdown()
     this.closeEditExpenseModal()
 
     this.showNotification("Expense updated successfully!")
@@ -443,6 +451,8 @@ class SpendiApp {
         this.updateSummary()
         this.updateBalancesList()
         this.updateExpensesList()
+        this.updateSpendingChart()
+        this.updateCategoryBreakdown()
         this.closeEditExpenseModal()
 
         this.showNotification("Expense deleted successfully!")
@@ -1237,6 +1247,243 @@ class SpendiApp {
     URL.revokeObjectURL(url)
 
     this.showNotification("History exported successfully!")
+  }
+
+  // Chart and Dashboard Methods
+  initCharts() {
+    const canvas = document.getElementById('spendingChart')
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    
+    // Create gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200)
+    gradient.addColorStop(0, 'rgba(115, 115, 115, 0.3)')
+    gradient.addColorStop(1, 'rgba(115, 115, 115, 0.01)')
+
+    this.spendingChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: this.getLast7Days(),
+        datasets: [{
+          label: 'Daily Spending',
+          data: this.getDailySpending(),
+          fill: true,
+          backgroundColor: gradient,
+          borderColor: '#737373',
+          borderWidth: 2,
+          tension: 0.4,
+          pointRadius: 4,
+          pointBackgroundColor: '#737373',
+          pointBorderColor: '#ffffff',
+          pointBorderWidth: 2,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#525252',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: false
+          },
+          tooltip: {
+            backgroundColor: 'rgba(26, 26, 26, 0.95)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            borderColor: 'rgba(115, 115, 115, 0.3)',
+            borderWidth: 1,
+            cornerRadius: 8,
+            padding: 12,
+            displayColors: false,
+            callbacks: {
+              label: function(context) {
+                return '₹' + context.parsed.y.toFixed(2)
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: {
+              display: false
+            },
+            ticks: {
+              color: '#64748b',
+              font: {
+                size: 11,
+                family: 'Inter'
+              }
+            }
+          },
+          y: {
+            beginAtZero: true,
+            grid: {
+              color: 'rgba(100, 116, 139, 0.1)'
+            },
+            ticks: {
+              color: '#64748b',
+              font: {
+                size: 11,
+                family: 'Inter'
+              },
+              callback: function(value) {
+                return '₹' + value
+              }
+            }
+          }
+        },
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        }
+      }
+    })
+  }
+
+  getLast7Days() {
+    const days = []
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      days.push(dayNames[date.getDay()])
+    }
+    
+    return days
+  }
+
+  getDailySpending() {
+    const spending = []
+    
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date()
+      date.setDate(date.getDate() - i)
+      const dateStr = date.toISOString().split('T')[0]
+      
+      const dayTotal = this.expenses
+        .filter(exp => exp.date === dateStr && exp.paidBy === 'You')
+        .reduce((sum, exp) => sum + exp.amount, 0)
+      
+      spending.push(dayTotal)
+    }
+    
+    return spending
+  }
+
+  updateSpendingChart() {
+    if (!this.spendingChart) return
+    
+    this.spendingChart.data.labels = this.getLast7Days()
+    this.spendingChart.data.datasets[0].data = this.getDailySpending()
+    this.spendingChart.update('none')
+  }
+
+  updateCategoryBreakdown() {
+    const container = document.getElementById('categoryBreakdown')
+    if (!container) return
+
+    const currentMonth = new Date().getMonth()
+    const currentYear = new Date().getFullYear()
+
+    // Get category totals for current month
+    const categoryTotals = {}
+    let totalSpending = 0
+
+    this.expenses.forEach(expense => {
+      const expenseDate = new Date(expense.date)
+      if (expense.paidBy === 'You' && 
+          expenseDate.getMonth() === currentMonth && 
+          expenseDate.getFullYear() === currentYear) {
+        const categoryName = expense.category.replace(/^[^\w\s]+\s*/, '')
+        categoryTotals[categoryName] = (categoryTotals[categoryName] || 0) + expense.amount
+        totalSpending += expense.amount
+      }
+    })
+
+    if (totalSpending === 0) {
+      container.innerHTML = `
+        <div class="empty-categories">
+          <p>No spending data this month</p>
+        </div>
+      `
+      return
+    }
+
+    // Sort by amount and take top 5
+    const sortedCategories = Object.entries(categoryTotals)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+
+    const categoryColors = {
+      'Food & Dining': '#ef4444',
+      'Groceries': '#22c55e',
+      'Travel': '#3b82f6',
+      'Transportation': '#f59e0b',
+      'Shopping': '#ec4899',
+      'Entertainment': '#8b5cf6',
+      'Bills & Utilities': '#64748b',
+      'Rent & Housing': '#0ea5e9',
+      'Medical & Health': '#14b8a6',
+      'Education': '#6366f1',
+      'Sports & Fitness': '#f97316',
+      'Other': '#94a3b8'
+    }
+
+    const html = sortedCategories.map(([category, amount]) => {
+      const percentage = (amount / totalSpending * 100).toFixed(0)
+      const color = categoryColors[category] || '#64748b'
+      
+      return `
+        <div class="spending-item">
+          <div class="spending-item-header">
+            <span class="spending-category" style="color: ${color}">${category}</span>
+            <span class="spending-amount">₹${amount.toFixed(0)}</span>
+          </div>
+          <div class="spending-bar">
+            <div class="spending-bar-fill" style="width: ${percentage}%; background: ${color}"></div>
+          </div>
+          <span class="spending-percentage">${percentage}%</span>
+        </div>
+      `
+    }).join('')
+
+    container.innerHTML = html
+  }
+
+  updateCurrentMonthBadge() {
+    const badge = document.querySelector('.current-month-badge')
+    if (badge) {
+      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+      const now = new Date()
+      badge.textContent = `${monthNames[now.getMonth()]} ${now.getFullYear()}`
+    }
+  }
+
+  animateNumber(element, targetValue, duration = 500) {
+    const startValue = parseFloat(element.textContent.replace(/[^0-9.-]/g, '')) || 0
+    const startTime = performance.now()
+    
+    const animate = (currentTime) => {
+      const elapsed = currentTime - startTime
+      const progress = Math.min(elapsed / duration, 1)
+      
+      // Ease out cubic
+      const easeOut = 1 - Math.pow(1 - progress, 3)
+      const currentValue = startValue + (targetValue - startValue) * easeOut
+      
+      element.textContent = `₹${currentValue.toFixed(2)}`
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate)
+      }
+    }
+    
+    requestAnimationFrame(animate)
   }
 
   closeAllModals() {
