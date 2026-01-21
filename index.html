@@ -1,400 +1,589 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spendi - Your Smart Hisaab Partner</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spendi - Expense Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-
 <body class="light-theme">
-    <div class="container">
-        <!-- Header -->
-        <header class="header">
-            <h1 class="logo">Spendi</h1>
-            <p class="tagline">Your Smart Hisaab Partner</p>
-            <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme">
-                <span class="theme-icon">🌙</span>
-            </button>
-        </header>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <span class="brand-logo">₹</span>
+        <span class="brand-text">Spendi</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-section="dashboard">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-btn" onclick="openExpenseModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+          Add Expense
+        </button>
+        <button class="nav-btn" onclick="openFriendModal()">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Add Friend
+        </button>
+        <button class="nav-btn" onclick="openFriendsManagementModal()">
+          <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Manage Friends
+        </button>
+        <button class="nav-btn" onclick="openExpenseHistoryModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          History
+        </button>
+        
+        <div class="nav-divider"></div>
+        
+        <button class="nav-btn" onclick="openSettingsModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          Settings
+        </button>
+        <button class="nav-btn" onclick="openAboutModal()">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          About
+        </button>
+      </nav>
 
-        <section class="summary">
-            <div class="summary-card">
-                <h3>Personal Expenses</h3>
-                <p class="amount" id="personalExpenses">₹0</p>
-                <span class="period">This Month</span>
-            </div>
-            <div class="summary-card owe">
-                <h3>You Owe</h3>
-                <p class="amount" id="youOwe">₹0</p>
-                <span class="period">Total</span>
-            </div>
-            <div class="summary-card owed">
-                <h3>Others Owe You</h3>
-                <p class="amount" id="othersOwe">₹0</p>
-                <span class="period">Total</span>
-            </div>
-            <div class="summary-card friends">
-                <h3>Friends</h3>
-                <p class="count" id="friendsCount">0</p>
-                <span class="label">Total Friends</span>
-            </div>
-        </section>
+      <div class="sidebar-footer">
+        <div class="profile-section">
+          <div class="profile-avatar">
+            <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <div class="profile-info">
+            <span class="profile-name">Guest User</span>
+            <span class="profile-email">Sign in →</span>
+          </div>
+        </div>
+      </div>
+    </aside>
 
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Header -->
+      <header class="header">
+        <button class="menu-btn" id="menuBtn">
+          <svg viewBox="0 0 24 24"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+        </button>
+        <div class="header-info">
+          <h1>Dashboard</h1>
+          <p>Track expenses & balances</p>
+        </div>
+        <button class="header-action" onclick="openExpenseModal()">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          <span>Add Expense</span>
+        </button>
+      </header>
 
-        <!-- Action Buttons -->
-        <section class="actions">
-            <button class="button" onclick="openExpenseModal()">Add Expense</button>
-            <button class="button btn-secondary" onclick="openFriendModal()">Add Friend</button>
-            <button class="button btn-tertiary" onclick="openFriendsManagementModal()">Manage Friends</button>
-            <button class="button btn-quaternary" onclick="openExpenseHistoryModal()">View History</button>
-        </section>
-
-        <!-- Balances Section -->
-        <section class="balances">
-            <h2>Balances</h2>
-            <div id="balancesList" class="balances-list">
-                <p class="no-data">No balances yet. Add some friends and expenses!</p>
+      <!-- Content -->
+      <div class="content">
+        <!-- Stats -->
+        <div class="stats">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-        </section>
-
-        <!-- Recent Expenses -->
-        <section class="recent-expenses">
-            <h2>Recent Expenses</h2>
-            <div id="expensesList" class="expenses-list">
-                <p class="no-data">No expenses yet. Start tracking your spending!</p>
+            <div class="stat-info">
+              <span class="stat-label">Personal Expenses</span>
+              <span class="stat-value" id="personalExpenses">₹0.00</span>
             </div>
-        </section>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">You Owe</span>
+              <span class="stat-value" id="youOwe">₹0.00</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <svg viewBox="0 0 24 24"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Others Owe You</span>
+              <span class="stat-value" id="othersOwe">₹0.00</span>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">
+              <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div class="stat-info">
+              <span class="stat-label">Friends</span>
+              <span class="stat-value" id="friendsCount">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions (Mobile) -->
+        <div class="quick-actions">
+          <button onclick="openExpenseModal()">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            Expense
+          </button>
+          <button onclick="openFriendModal()">
+            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Friend
+          </button>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="cards-grid">
+          <!-- Balances Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Friend Balances</h2>
+              <button class="card-action" onclick="openFriendsManagementModal()">Manage</button>
+            </div>
+            <div class="card-body">
+              <div id="balancesList" class="balances-list">
+                <div class="empty-state">
+                  <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  <p>No friends added yet</p>
+                  <button onclick="openFriendModal()">Add Friend</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expenses Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2>Recent Expenses</h2>
+              <button class="card-action" onclick="openExpenseHistoryModal()">View All</button>
+            </div>
+            <div class="card-body">
+              <div id="expensesList" class="expenses-list">
+                <div class="empty-state">
+                  <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                  <p>No expenses recorded</p>
+                  <button onclick="openExpenseModal()">Add Expense</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <!-- Expense Modal -->
+  <div class="modal" id="expenseModal">
+    <div class="modal-overlay" onclick="closeExpenseModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add Expense</h3>
+        <button class="modal-close" onclick="closeExpenseModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="expenseForm">
+        <div class="form-group">
+          <label for="expenseTitle">Title</label>
+          <input type="text" id="expenseTitle" placeholder="What was it for?" required>
+        </div>
+        <div class="form-group">
+          <label for="expenseAmount">Amount (₹)</label>
+          <input type="number" id="expenseAmount" placeholder="0.00" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label for="expenseDate">Date</label>
+          <input type="date" id="expenseDate">
+        </div>
+        <div class="form-group">
+          <label for="expenseCategory">Category</label>
+          <select id="expenseCategory">
+            <option value="food">Food & Drinks</option>
+            <option value="transport">Transport</option>
+            <option value="shopping">Shopping</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="bills">Bills & Utilities</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="expensePaidBy">Paid By</label>
+          <select id="expensePaidBy">
+            <option value="You">You</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Split With</label>
+          <div id="splitWithList" class="checkbox-list">
+            <label class="checkbox-item">
+              <input type="checkbox" value="You" checked>
+              <span>You</span>
+            </label>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Expense</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Add Expense Modal -->
-    <div id="expenseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add Expense</h2>
-                <span class="close" onclick="closeExpenseModal()">&times;</span>
-            </div>
-            <form id="expenseForm" class="modal-form">
-                <div class="form-group">
-                    <label for="expenseTitle">Title</label>
-                    <input type="text" id="expenseTitle" required placeholder="e.g., Dinner at restaurant">
-                </div>
-
-                <div class="form-group">
-                    <label for="expenseAmount">Amount (₹)</label>
-                    <input type="number" id="expenseAmount" required min="0" step="0.01" placeholder="0.00">
-                </div>
-
-                <div class="form-group">
-                    <label for="expenseDate">Date</label>
-                    <input type="date" id="expenseDate" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="expenseCategory">Category</label>
-                    <select id="expenseCategory" required>
-                        <option value="">Select Category</option>
-                        <option value="Food & Dining">🍽️ Food & Dining</option>
-                        <option value="Groceries">🛒 Groceries</option>
-                        <option value="Travel">✈️ Travel</option>
-                        <option value="Transportation">🚗 Transportation</option>
-                        <option value="Shopping">🛍️ Shopping</option>
-                        <option value="Entertainment">🎬 Entertainment</option>
-                        <option value="Bills & Utilities">💡 Bills & Utilities</option>
-                        <option value="Rent & Housing">🏠 Rent & Housing</option>
-                        <option value="Medical & Health">🏥 Medical & Health</option>
-                        <option value="Education">📚 Education</option>
-                        <option value="Sports & Fitness">⚽ Sports & Fitness</option>
-                        <option value="Beauty & Personal Care">💄 Beauty & Personal Care</option>
-                        <option value="Gifts & Donations">🎁 Gifts & Donations</option>
-                        <option value="Insurance">🛡️ Insurance</option>
-                        <option value="Investments">📈 Investments</option>
-                        <option value="Subscriptions">📱 Subscriptions</option>
-                        <option value="Pet Care">🐕 Pet Care</option>
-                        <option value="Home & Garden">🏡 Home & Garden</option>
-                        <option value="Electronics">💻 Electronics</option>
-                        <option value="Clothing">👕 Clothing</option>
-                        <option value="Other">📝 Other</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="expensePaidBy">Paid By</label>
-                    <select id="expensePaidBy" required>
-                        <option value="You">You</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Split With</label>
-                    <div id="splitWithList" class="checkbox-list">
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="You" checked disabled>
-                            <span>You</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Expense</button>
-                </div>
-            </form>
+  <!-- Friend Modal -->
+  <div class="modal" id="friendModal">
+    <div class="modal-overlay" onclick="closeFriendModal()"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3>Add Friend</h3>
+        <button class="modal-close" onclick="closeFriendModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="friendForm">
+        <div class="form-group">
+          <label for="friendName">Friend's Name</label>
+          <input type="text" id="friendName" placeholder="Enter name" required>
         </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-secondary" onclick="closeFriendModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Friend</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Add Friend Modal -->
-    <div id="friendModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Add Friend</h2>
-                <span class="close" onclick="closeFriendModal()">&times;</span>
-            </div>
-            <form id="friendForm" class="modal-form">
-                <div class="form-group">
-                    <label for="friendName">Friend's Name</label>
-                    <input type="text" id="friendName" required placeholder="Enter friend's name">
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="closeFriendModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Friend</button>
-                </div>
-            </form>
-        </div>
+  <!-- Balance Details Modal -->
+  <div class="modal" id="balanceModal">
+    <div class="modal-overlay" onclick="closeBalanceModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="balanceModalTitle">Balance Details</h3>
+        <button class="modal-close" onclick="closeBalanceModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body" id="balanceDetails">
+        <!-- Dynamic content -->
+      </div>
+      <div class="modal-footer" id="balanceModalFooter">
+        <!-- Dynamic buttons -->
+      </div>
     </div>
+  </div>
 
-    <!-- Add Balance Details Modal after the existing modals -->
-    <!-- Balance Details Modal -->
-    <div id="balanceModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="balanceModalTitle">Balance Details</h2>
-                <span class="close" onclick="closeBalanceModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="balanceDetails" class="balance-details">
-                    <!-- Balance details will be populated here -->
-                </div>
-                <div class="balance-summary">
-                    <div class="summary-row">
-                        <span class="summary-label">Net Balance:</span>
-                        <span id="netBalance" class="summary-amount">₹0</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeBalanceModal()">Close</button>
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" onclick="closeBalanceModal()">Close</button>
-                    <button class="btn btn-tertiary" onclick="openPartialSettlement()">Settle Selected</button>
-                    <button id="settleUpBtn" class="btn btn-primary" onclick="settleBalance()">Settle All</button>
-                </div>
-            </div>
+  <!-- Edit Expense Modal -->
+  <div class="modal" id="editExpenseModal">
+    <div class="modal-overlay" onclick="closeEditExpenseModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Edit Expense</h3>
+        <button class="modal-close" onclick="closeEditExpenseModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <form id="editExpenseForm">
+        <div class="form-group">
+          <label for="editExpenseTitle">Title</label>
+          <input type="text" id="editExpenseTitle" required>
         </div>
+        <div class="form-group">
+          <label for="editExpenseAmount">Amount (₹)</label>
+          <input type="number" id="editExpenseAmount" step="0.01" min="0" required>
+        </div>
+        <div class="form-group">
+          <label for="editExpenseDate">Date</label>
+          <input type="date" id="editExpenseDate">
+        </div>
+        <div class="form-group">
+          <label for="editExpenseCategory">Category</label>
+          <select id="editExpenseCategory">
+            <option value="food">Food & Drinks</option>
+            <option value="transport">Transport</option>
+            <option value="shopping">Shopping</option>
+            <option value="entertainment">Entertainment</option>
+            <option value="bills">Bills & Utilities</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="editExpensePaidBy">Paid By</label>
+          <select id="editExpensePaidBy">
+            <option value="You">You</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Split With</label>
+          <div id="editSplitWithList" class="checkbox-list">
+            <label class="checkbox-item">
+              <input type="checkbox" value="You" checked>
+              <span>You</span>
+            </label>
+          </div>
+        </div>
+        <div class="edit-history" id="editHistory">
+          <h4>Edit History</h4>
+          <div class="edit-history-list" id="editHistoryList"></div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-danger" onclick="deleteExpense()">Delete</button>
+          <button type="button" class="btn btn-secondary" onclick="closeEditExpenseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
     </div>
+  </div>
 
-    <!-- Edit Expense Modal -->
-    <div id="editExpenseModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Edit Expense</h2>
-                <span class="close" onclick="closeEditExpenseModal()">&times;</span>
-            </div>
-            <form id="editExpenseForm" class="modal-form">
-                <div class="form-group">
-                    <label for="editExpenseTitle">Title</label>
-                    <input type="text" id="editExpenseTitle" required placeholder="e.g., Dinner at restaurant">
-                </div>
-
-                <div class="form-group">
-                    <label for="editExpenseAmount">Amount (₹)</label>
-                    <input type="number" id="editExpenseAmount" required min="0" step="0.01" placeholder="0.00">
-                </div>
-
-                <div class="form-group">
-                    <label for="editExpenseDate">Date</label>
-                    <input type="date" id="editExpenseDate" required>
-                </div>
-
-                <div class="form-group">
-                    <label for="editExpenseCategory">Category</label>
-                    <select id="editExpenseCategory" required>
-                        <option value="">Select Category</option>
-                        <option value="Food & Dining">🍽️ Food & Dining</option>
-                        <option value="Groceries">🛒 Groceries</option>
-                        <option value="Travel">✈️ Travel</option>
-                        <option value="Transportation">🚗 Transportation</option>
-                        <option value="Shopping">🛍️ Shopping</option>
-                        <option value="Entertainment">🎬 Entertainment</option>
-                        <option value="Bills & Utilities">💡 Bills & Utilities</option>
-                        <option value="Rent & Housing">🏠 Rent & Housing</option>
-                        <option value="Medical & Health">🏥 Medical & Health</option>
-                        <option value="Education">📚 Education</option>
-                        <option value="Sports & Fitness">⚽ Sports & Fitness</option>
-                        <option value="Beauty & Personal Care">💄 Beauty & Personal Care</option>
-                        <option value="Gifts & Donations">🎁 Gifts & Donations</option>
-                        <option value="Insurance">🛡️ Insurance</option>
-                        <option value="Investments">📈 Investments</option>
-                        <option value="Subscriptions">📱 Subscriptions</option>
-                        <option value="Pet Care">🐕 Pet Care</option>
-                        <option value="Home & Garden">🏡 Home & Garden</option>
-                        <option value="Electronics">💻 Electronics</option>
-                        <option value="Clothing">👕 Clothing</option>
-                        <option value="Other">📝 Other</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="editExpensePaidBy">Paid By</label>
-                    <select id="editExpensePaidBy" required>
-                        <option value="You">You</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Split With</label>
-                    <div id="editSplitWithList" class="checkbox-list">
-                        <label class="checkbox-item">
-                            <input type="checkbox" value="You" checked disabled>
-                            <span>You</span>
-                        </label>
-                    </div>
-                </div>
-
-                <div class="edit-history">
-                    <h4>Edit History</h4>
-                    <div id="editHistoryList" class="edit-history-list">
-                        <!-- Edit history will be populated here -->
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn-danger" onclick="deleteExpense()">Delete</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeEditExpenseModal()">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Save Changes</button>
-                </div>
-            </form>
+  <!-- Friends Management Modal -->
+  <div class="modal" id="friendsManagementModal">
+    <div class="modal-overlay" onclick="closeFriendsManagementModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Manage Friends</h3>
+        <button class="modal-close" onclick="closeFriendsManagementModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div id="friendsManagementList" class="friends-list">
+          <!-- Dynamic content -->
         </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="openFriendModal(); closeFriendsManagementModal();">
+          <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+          Add Friend
+        </button>
+      </div>
     </div>
+  </div>
 
-    <!-- Friends Management Modal -->
-    <div id="friendsManagementModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>Manage Friends</h2>
-                <span class="close" onclick="closeFriendsManagementModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div id="friendsManagementList" class="friends-management-list">
-                    <!-- Friends list will be populated here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeFriendsManagementModal()">Close</button>
-            </div>
-        </div>
+  <!-- Partial Settlement Modal -->
+  <div class="modal" id="partialSettlementModal">
+    <div class="modal-overlay" onclick="closePartialSettlementModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="partialSettlementTitle">Partial Settlement</h3>
+        <button class="modal-close" onclick="closePartialSettlementModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="settlement-info" id="settlementInfo"></div>
+        <div class="settlement-list" id="settlementExpensesList"></div>
+        <div class="settlement-totals" id="settlementTotals"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closePartialSettlementModal()">Cancel</button>
+        <button class="btn btn-primary" id="confirmSettlementBtn" onclick="confirmPartialSettlement()">Settle Selected</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Partial Settlement Modal -->
-    <div id="partialSettlementModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="partialSettlementTitle">Settle Expenses</h2>
-                <span class="close" onclick="closePartialSettlementModal()">&times;</span>
-            </div>
-            <div class="modal-body">
-                <div class="settlement-summary">
-                    <h3>Select expenses to settle with <span id="settlementFriendName"></span></h3>
-                    <p class="settlement-info">Choose which specific expenses you want to mark as settled. This will
-                        create a settlement record while keeping the original expense history intact.</p>
-                </div>
-                <div id="settlementExpensesList" class="settlement-expenses-list">
-                    <!-- Settlement expenses will be populated here -->
-                </div>
-                <div class="settlement-totals">
-                    <div class="total-row">
-                        <span>Selected Amount:</span>
-                        <span id="selectedSettlementAmount" class="amount">₹0.00</span>
-                    </div>
-                    <div class="total-row final-total">
-                        <span>Net Settlement:</span>
-                        <span id="netSettlementAmount" class="amount">₹0.00</span>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closePartialSettlementModal()">Cancel</button>
-                <button id="confirmPartialSettlement" class="btn btn-primary" onclick="confirmPartialSettlement()"
-                    disabled>Settle Selected</button>
-            </div>
+  <!-- Expense History Modal -->
+  <div class="modal" id="expenseHistoryModal">
+    <div class="modal-overlay" onclick="closeExpenseHistoryModal()"></div>
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3>Expense History</h3>
+        <button class="modal-close" onclick="closeExpenseHistoryModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="history-filters">
+          <div class="filter-item">
+            <label for="historyTypeFilter">Type</label>
+            <select id="historyTypeFilter" onchange="filterExpenseHistory()">
+              <option value="all">All</option>
+              <option value="expense">Expenses</option>
+              <option value="settlement">Settlements</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="historyFriendFilter">Friend</label>
+            <select id="historyFriendFilter" onchange="filterExpenseHistory()">
+              <option value="all">All Friends</option>
+            </select>
+          </div>
+          <div class="filter-item">
+            <label for="historySortFilter">Sort By</label>
+            <select id="historySortFilter" onchange="filterExpenseHistory()">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="highest">Highest Amount</option>
+              <option value="lowest">Lowest Amount</option>
+            </select>
+          </div>
         </div>
+        <div class="history-list" id="historyList">
+          <!-- Dynamic content -->
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- Expense History Modal -->
-    <div id="expenseHistoryModal" class="modal">
-        <div class="modal-content large-modal">
-            <div class="modal-header">
-                <h2>Complete Expense History</h2>
-                <span class="close" onclick="closeExpenseHistoryModal()">&times;</span>
+  <!-- Settings Modal -->
+  <div class="modal" id="settingsModal">
+    <div class="modal-overlay" onclick="closeSettingsModal()"></div>
+    <div class="modal-content modal-sm">
+      <div class="modal-header">
+        <h3>Settings</h3>
+        <button class="modal-close" onclick="closeSettingsModal()">
+          <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-group">
+          <h4>Appearance</h4>
+          <div class="settings-item">
+            <div class="settings-label">
+              <span class="settings-title">Dark Mode</span>
+              <span class="settings-desc">Switch to dark theme</span>
             </div>
-            <div class="modal-body">
-                <div class="history-filters">
-                    <div class="filter-group">
-                        <label for="historyFilter">Filter by:</label>
-                        <select id="historyFilter" onchange="filterExpenseHistory()">
-                            <option value="all">All Records</option>
-                            <option value="expenses">Expenses Only</option>
-                            <option value="settlements">Settlements Only</option>
-                            <option value="edits">Edits Only</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="historyFriendFilter">Friend:</label>
-                        <select id="historyFriendFilter" onchange="filterExpenseHistory()">
-                            <option value="all">All Friends</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label for="historyDateFilter">Date Range:</label>
-                        <select id="historyDateFilter" onchange="filterExpenseHistory()">
-                            <option value="all">All Time</option>
-                            <option value="week">Last Week</option>
-                            <option value="month">Last Month</option>
-                            <option value="3months">Last 3 Months</option>
-                            <option value="year">Last Year</option>
-                        </select>
-                    </div>
-                </div>
-                <div id="expenseHistoryList" class="expense-history-list">
-                    <!-- History will be populated here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeExpenseHistoryModal()">Close</button>
-                <button class="btn btn-primary" onclick="exportHistory()">Export History</button>
-            </div>
+            <label class="toggle-switch">
+              <input type="checkbox" id="darkModeToggle" onchange="toggleTheme()">
+              <span class="toggle-slider"></span>
+            </label>
+          </div>
         </div>
+        <div class="settings-group">
+          <h4>Data</h4>
+          <div class="settings-item clickable" onclick="exportData()">
+            <div class="settings-label">
+              <span class="settings-title">Export Data</span>
+              <span class="settings-desc">Download your expenses as JSON</span>
+            </div>
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </div>
+          <div class="settings-item clickable danger" onclick="clearAllData()">
+            <div class="settings-label">
+              <span class="settings-title">Clear All Data</span>
+              <span class="settings-desc">Delete all expenses and friends</span>
+            </div>
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <script src="script.js"></script>
-
-    <footer class="footer">
-        <div class="footer-contact-title">CONTACT</div>
-        <div class="footer-icons">
-            <a href="https://www.linkedin.com/in/chirag-sharma-240885212/" target="_blank" aria-label="LinkedIn">
-                <img src="linkedin.png" alt="LinkedIn" class="footer-icon" />
-            </a>
-            <a href="mailto:chiragsharma.ijs@gmail.com" aria-label="Email">
-                <img src="mail.png" alt="Gmail" class="footer-icon" />
-            </a>
+  <!-- About Modal -->
+  <div class="modal" id="aboutModal">
+    <div class="modal-overlay" onclick="closeAboutModal()"></div>
+    <div class="modal-content about-modal">
+      <div class="modal-header">
+        <h2>About Spendi</h2>
+        <button class="modal-close" onclick="closeAboutModal()">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="about-content">
+        <div class="about-logo">
+          <span class="logo-icon">💸</span>
+          <h1>Spendi</h1>
+          <p class="version">Version 1.0</p>
         </div>
-        <div class="footer-copyright">
-            © 2025 Chirag Sharma. All rights reserved.
+        
+        <div class="about-description">
+          <p>A simple and elegant expense tracker to split bills with friends. Track who owes whom and settle up easily.</p>
         </div>
-    </footer>
+        
+        <div class="about-creator">
+          <h3>Created by</h3>
+          <a href="https://yeschirag.me" target="_blank" class="creator-link">
+            <div class="creator-avatar">C</div>
+            <div class="creator-info">
+              <span class="creator-name">Chirag</span>
+              <span class="creator-site">yeschirag.me</span>
+            </div>
+          </a>
+        </div>
+        
+        <div class="about-links">
+          <a href="https://github.com/yeschirag" target="_blank" class="about-link">
+            <svg viewBox="0 0 24 24"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            GitHub
+          </a>
+          <a href="https://linkedin.com/in/yeschirag" target="_blank" class="about-link">
+            <svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+          <a href="mailto:chirag@yeschirag.me" class="about-link">
+            <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Email
+          </a>
+        </div>
+        
+        <p class="about-footer">Thank you for using Spendi! ❤️</p>
+      </div>
+    </div>
+  </div>
 
+  <script src="script.js"></script>
+  <script>
+    // About Modal Functions
+    function openAboutModal() {
+      document.getElementById('aboutModal').style.display = 'block';
+    }
+    
+    function closeAboutModal() {
+      document.getElementById('aboutModal').style.display = 'none';
+    }
+    
+    // Settings Modal Functions
+    function openSettingsModal() {
+      document.getElementById('settingsModal').style.display = 'block';
+      document.getElementById('darkModeToggle').checked = document.body.classList.contains('dark-theme');
+    }
+    
+    function closeSettingsModal() {
+      document.getElementById('settingsModal').style.display = 'none';
+    }
+    
+    function exportData() {
+      const data = localStorage.getItem('spendiData');
+      if (data) {
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'spendi-backup.json';
+        a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        alert('No data to export');
+      }
+    }
+    
+    function clearAllData() {
+      if (confirm('Are you sure you want to delete all data? This cannot be undone.')) {
+        localStorage.removeItem('spendiData');
+        localStorage.removeItem('theme');
+        location.reload();
+      }
+    }
+
+    // Mobile Menu
+    document.getElementById('menuBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.toggle('open');
+    });
+
+    // Close sidebar on overlay click (mobile)
+    document.addEventListener('click', (e) => {
+      const sidebar = document.getElementById('sidebar');
+      const menuBtn = document.getElementById('menuBtn');
+      if (sidebar.classList.contains('open') && 
+          !sidebar.contains(e.target) && 
+          !menuBtn.contains(e.target)) {
+        sidebar.classList.remove('open');
+      }
+    });
+  </script>
 </body>
-
 </html>
