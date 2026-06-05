@@ -12,6 +12,7 @@ import { AuthPage } from './pages/AuthPage';
 import { AddExpensePage } from './pages/AddExpensePage';
 import { FriendsPage } from './pages/FriendsPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { HistoryPage } from './pages/HistoryPage';
 import { SmoothScroll } from './components/layout/SmoothScroll';
 import { useAuth } from './context/AuthContext';
 import { useAppContext } from './context/AppContext';
@@ -69,8 +70,8 @@ function App() {
               <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
               <Route path="/add-expense" element={<ProtectedRoute><MainLayout><AddExpensePage /></MainLayout></ProtectedRoute>} />
               <Route path="/friends" element={<ProtectedRoute><MainLayout><FriendsPage /></MainLayout></ProtectedRoute>} />
+              <Route path="/history" element={<ProtectedRoute><MainLayout><HistoryPage /></MainLayout></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />
-              <Route path="/about" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />
             </Routes>
           </BrowserRouter>
         </SmoothScroll>

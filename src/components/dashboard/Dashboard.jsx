@@ -157,23 +157,23 @@ export const Dashboard = () => {
 
       {/* Dashboard Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-8">
-        <div className="border-t border-white/5 pt-8 group">
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 group">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Spending Overview.</h3>
-            <span className="flex items-center gap-1.5 px-3 py-1 bg-white/5 text-white/50 rounded-full text-xs font-medium tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>This Month</span>
+            <span className="flex items-center gap-1.5 px-3 py-1 bg-white/10 text-white/70 rounded-full text-xs font-medium tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>This Month</span>
           </div>
           <div className="relative h-[240px] flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
             <Bar data={barData} options={chartOptions} />
           </div>
         </div>
         
-        <div className="border-t border-white/5 pt-8 group">
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 group">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>By Category.</h3>
           </div>
           <div className="relative h-[240px] flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
             {categoryData.length > 0 ? (
-              <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'rgba(255,255,255,0.5)', font: { family: "'Inter', sans-serif" } } } }, cutout: '80%' }} />
+              <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'rgba(255,255,255,0.7)', font: { family: "'Inter', sans-serif" } } } }, cutout: '80%' }} />
             ) : (
               <div className="py-12 text-center w-full">
                 <p className="text-sm text-white/40 tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>No expenses to chart</p>
@@ -185,7 +185,7 @@ export const Dashboard = () => {
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
-        <div className="border-t border-white/10 pt-8">
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Friend Balances.</h2>
             <button className="text-xs uppercase tracking-wider font-medium text-white/40 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }} onClick={() => navigate('/friends')}>Manage</button>
@@ -216,10 +216,10 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="border-t border-white/10 pt-8">
+        <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Recent Expenses.</h2>
-            <button className="text-xs uppercase tracking-wider font-medium text-white/40 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }} onClick={() => navigate('/add-expense')}>View All</button>
+            <button className="text-xs uppercase tracking-wider font-medium text-white/40 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }} onClick={() => navigate('/history')}>View All</button>
           </div>
           <div>
             <div className="flex flex-col gap-2">

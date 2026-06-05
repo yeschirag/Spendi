@@ -50,11 +50,7 @@ export const Sidebar = ({ onOpenModal }) => {
         
         <button className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/profile') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`} onClick={() => navigate('/profile')}>
           <Settings size={18} strokeWidth={2} />
-          Settings
-        </button>
-        <button className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/about') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`} onClick={() => navigate('/about')}>
-          <Info size={18} strokeWidth={2} />
-          About
+          Profile
         </button>
       </nav>
 

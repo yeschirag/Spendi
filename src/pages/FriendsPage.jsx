@@ -34,7 +34,7 @@ export const FriendsPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-[#000000] min-h-screen animate-fade-in">
+    <div className="flex-1 p-8 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in">
       
       <button 
         onClick={() => navigate('/dashboard')}
@@ -58,8 +58,9 @@ export const FriendsPage = () => {
         
         {/* Add Friend Form */}
         <div className="lg:col-span-5">
-          <div className="bg-[#0A0A0A] border border-white/5 rounded-[2rem] p-8 shadow-2xl">
-            <h2 className="text-2xl text-white font-medium mb-8">Add a Friend</h2>
+          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+            <h2 className="text-2xl text-white font-normal mb-8 relative z-10" style={{ fontFamily: "'Instrument Serif', serif" }}>Add a Connection</h2>
             
             <form onSubmit={handleSubmit} className="flex flex-col gap-6">
               {error && (
@@ -97,7 +98,7 @@ export const FriendsPage = () => {
                 const isOwing = balance < 0;
                 
                 return (
-                  <div key={friend} className="flex items-center justify-between p-6 bg-[#0A0A0A] border border-white/5 rounded-2xl hover:border-white/20 transition-all group">
+                  <div key={friend} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group">
                     <div className="flex items-center gap-5">
                       <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
                         {friend.charAt(0).toUpperCase()}

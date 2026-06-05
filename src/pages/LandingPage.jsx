@@ -67,8 +67,9 @@ export const LandingPage = () => {
 
         {/* Navigation bar (z-10) */}
         <nav className="relative z-10 w-full flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
-        <div className="flex items-center">
-          <img src="/full-logo.png" alt="Spendi" className="h-8 object-contain filter brightness-0" />
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain filter brightness-0" />
+          <div className="text-3xl tracking-tight text-[#000000]" style={{ fontFamily: "'Instrument Serif', serif" }}>Spendi</div>
         </div>
         <div className="hidden md:flex gap-8 items-center" style={{ fontFamily: "'Inter', sans-serif" }}>
           <Link to="/" className="text-sm text-[#000000] transition-colors">Home</Link>
