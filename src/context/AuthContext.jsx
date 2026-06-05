@@ -9,18 +9,65 @@ export const useAuth = () => {
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const fetchProfile = async (userId) => {
+    try {
+      let { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      
+      if (error) throw error;
+
+      // Auto-heal missing profile for existing accounts
+      if (!data && userId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: newProfile, error: insertError } = await supabase
+            .from('profiles')
+            .insert([{ 
+               id: user.id, 
+               email: user.email, 
+               full_name: user.user_metadata?.full_name,
+               avatar_url: user.user_metadata?.avatar_url
+            }])
+            .select()
+            .single();
+            
+          if (!insertError) data = newProfile;
+        }
+      }
+      
+      setProfile(data);
+    } catch (err) {
+      console.error('Error fetching user profile:', err);
+      setProfile(null);
+    }
+  };
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      const authUser = session?.user ?? null;
+      setUser(authUser);
+      if (authUser) {
+        await fetchProfile(authUser.id);
+      }
       setLoading(false);
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const authUser = session?.user ?? null;
+      setUser(authUser);
+      if (authUser) {
+        await fetchProfile(authUser.id);
+      } else {
+        setProfile(null);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -47,12 +94,33 @@ export const AuthProvider = ({ children }) => {
     return supabase.auth.signOut();
   };
 
+  const updateProfile = async (updates) => {
+    if (!user) return null;
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      setProfile(data);
+      return data;
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      throw err;
+    }
+  };
+
   const value = {
     user,
+    profile,
     signUp,
     login,
     signInWithGoogle,
     logout,
+    updateProfile,
   };
 
   return (

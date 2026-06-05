@@ -279,6 +279,11 @@ CREATE POLICY "Authenticated users can view all profiles"
     TO authenticated
     USING (true);
 
+CREATE POLICY "Users can insert own profile"
+    ON public.profiles FOR INSERT
+    TO authenticated
+    WITH CHECK (auth.uid() = id);
+
 CREATE POLICY "Users can update own profile"
     ON public.profiles FOR UPDATE
     TO authenticated
@@ -331,16 +336,29 @@ CREATE POLICY "Users can remove friendships"
 
 ALTER TABLE public.expenses ENABLE ROW LEVEL SECURITY;
 
+-- Security definer functions to break RLS dependency graph loops
+CREATE OR REPLACE FUNCTION public.is_expense_participant(check_expense_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.expense_participants 
+        WHERE expense_id = check_expense_id AND user_id = auth.uid()
+    );
+$$;
+
+CREATE OR REPLACE FUNCTION public.is_expense_creator(check_expense_id UUID)
+RETURNS BOOLEAN
+LANGUAGE sql SECURITY DEFINER SET search_path = public AS $$
+    SELECT EXISTS (
+        SELECT 1 FROM public.expenses 
+        WHERE id = check_expense_id AND created_by = auth.uid()
+    );
+$$;
+
 CREATE POLICY "Users can view relevant expenses"
     ON public.expenses FOR SELECT
     TO authenticated
-    USING (
-        created_by = auth.uid()
-        OR id IN (
-            SELECT expense_id FROM public.expense_participants
-            WHERE user_id = auth.uid()
-        )
-    );
+    USING (created_by = auth.uid() OR public.is_expense_participant(id));
 
 CREATE POLICY "Users can create expenses"
     ON public.expenses FOR INSERT
@@ -362,39 +380,22 @@ ALTER TABLE public.expense_participants ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view relevant participants"
     ON public.expense_participants FOR SELECT
     TO authenticated
-    USING (
-        user_id = auth.uid()
-        OR expense_id IN (
-            SELECT id FROM public.expenses WHERE created_by = auth.uid()
-        )
-    );
+    USING (user_id = auth.uid() OR public.is_expense_creator(expense_id));
 
 CREATE POLICY "Expense creators manage participants"
     ON public.expense_participants FOR INSERT
     TO authenticated
-    WITH CHECK (
-        expense_id IN (
-            SELECT id FROM public.expenses WHERE created_by = auth.uid()
-        )
-    );
+    WITH CHECK (public.is_expense_creator(expense_id));
 
 CREATE POLICY "Expense creators update participants"
     ON public.expense_participants FOR UPDATE
     TO authenticated
-    USING (
-        expense_id IN (
-            SELECT id FROM public.expenses WHERE created_by = auth.uid()
-        )
-    );
+    USING (public.is_expense_creator(expense_id));
 
 CREATE POLICY "Expense creators delete participants"
     ON public.expense_participants FOR DELETE
     TO authenticated
-    USING (
-        expense_id IN (
-            SELECT id FROM public.expenses WHERE created_by = auth.uid()
-        )
-    );
+    USING (public.is_expense_creator(expense_id));
 
 ALTER TABLE public.settlements ENABLE ROW LEVEL SECURITY;
 

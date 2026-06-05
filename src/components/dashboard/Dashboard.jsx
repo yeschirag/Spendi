@@ -144,7 +144,7 @@ export const Dashboard = () => {
               animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
               exit={{ y: -30, opacity: 0, filter: 'blur(8px)' }}
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              className="text-4xl sm:text-6xl md:text-8xl text-white font-normal tracking-tight drop-shadow-2xl pb-2 leading-[1.1] w-full break-words whitespace-normal"
+              className="text-6xl sm:text-7xl md:text-8xl text-white font-normal tracking-tight drop-shadow-2xl pb-2 leading-[1.05] w-full break-words whitespace-normal"
               style={{ fontFamily: "'Instrument Serif', serif", gridArea: 'greeting' }}
             >
               {greetings[greetingIndex]}, {firstName}.
@@ -260,18 +260,32 @@ export const Dashboard = () => {
               ) : (
                 expenses.slice(0, 10).map((expense) => {
                   return (
-                    <div key={expense.id} className="flex flex-col sm:flex-row sm:items-end justify-between py-4 border-b border-white/5 group cursor-pointer" onClick={() => onOpenModal('editExpense', expense.id)}>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-lg text-white/80 group-hover:text-white transition-colors truncate font-light" style={{ fontFamily: "'Inter', sans-serif" }}>{expense.title}</h4>
-                        <div className="flex flex-wrap items-center gap-3 mt-2 text-xs text-white/40 font-light tracking-wide uppercase">
-                          <span>{new Date(expense.date).toLocaleDateString()}</span>
-                          <span className="text-white/20">|</span>
-                          <span>{expense.category}</span>
-                          <span className="text-white/20">|</span>
-                          <span>Paid by {expense.paidBy}</span>
+                    <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col sm:flex-row sm:items-center justify-between p-4 mb-3 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer shadow-lg">
+                      <div className="flex items-center gap-4 flex-1 min-w-0">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-white/10 to-white/5 flex items-center justify-center border border-white/10 shadow-inner">
+                          <span className="text-xl text-white/80 font-medium font-serif">{expense.category.charAt(0).toUpperCase()}</span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-lg text-white font-medium truncate tracking-tight" style={{ fontFamily: "'Inter', sans-serif" }}>{expense.title}</h4>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-white/50 font-light tracking-wide uppercase">
+                            <span>{new Date(expense.date).toLocaleDateString()}</span>
+                            <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                            <span>{expense.category}</span>
+                            <span className="w-1 h-1 rounded-full bg-white/20"></span>
+                            <span className="truncate text-white/70">Paid by {expense.paidBy}</span>
+                          </div>
                         </div>
                       </div>
-                      <div className="text-3xl text-white font-normal mt-2 sm:mt-0" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{expense.amount.toFixed(2)}</div>
+                      <div className="flex items-center justify-between sm:justify-end gap-4 mt-3 sm:mt-0 pl-16 sm:pl-0">
+                        <div className="text-2xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{expense.amount.toFixed(2)}</div>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); navigate(`/edit-expense/${expense.id}`); }} 
+                          className="md:opacity-0 group-hover:opacity-100 transition-all duration-300 p-2 bg-white/5 hover:bg-white/20 rounded-full text-white/70 hover:text-white border border-white/10"
+                          title="Edit Expense"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                        </button>
+                      </div>
                     </div>
                   );
                 })

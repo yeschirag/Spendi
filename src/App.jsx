@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
 import { Sidebar } from './components/layout/Sidebar';
+import { BottomNav } from './components/layout/BottomNav';
 import { Header } from './components/layout/Header';
 import { Dashboard } from './components/dashboard/Dashboard';
 import { ExpenseModal } from './components/modals/ExpenseModal';
@@ -10,6 +11,7 @@ import { FriendModal } from './components/modals/FriendModal';
 import { LandingPage } from './pages/LandingPage';
 import { AuthPage } from './pages/AuthPage';
 import { AddExpensePage } from './pages/AddExpensePage';
+import { EditExpensePage } from './pages/EditExpensePage';
 import { FriendsPage } from './pages/FriendsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { HistoryPage } from './pages/HistoryPage';
@@ -39,12 +41,16 @@ function MainLayout({ children }) {
 
   return (
     <div className="flex min-h-screen bg-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/[0.03] via-black to-black text-white font-body selection:bg-white/20">
-      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+      <div className="hidden md:block">
+        <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+      </div>
       
-      <main className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px]">
+      <main className="flex-1 flex flex-col min-h-screen pb-24 md:pb-0 ml-0 md:ml-[280px]">
         <Header onToggleMenu={toggleSidebar} />
         {children}
       </main>
+
+      <BottomNav />
     </div>
   );
 }
@@ -70,6 +76,7 @@ function App() {
               <Route path="/auth" element={<AuthPage />} />
               <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
               <Route path="/add-expense" element={<ProtectedRoute><MainLayout><AddExpensePage /></MainLayout></ProtectedRoute>} />
+              <Route path="/edit-expense/:id" element={<ProtectedRoute><MainLayout><EditExpensePage /></MainLayout></ProtectedRoute>} />
               <Route path="/friends" element={<ProtectedRoute><MainLayout><FriendsPage /></MainLayout></ProtectedRoute>} />
               <Route path="/history" element={<ProtectedRoute><MainLayout><HistoryPage /></MainLayout></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />

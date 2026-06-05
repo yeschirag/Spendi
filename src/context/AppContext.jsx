@@ -119,6 +119,38 @@ export const AppProvider = ({ children }) => {
     setExpenses(prev => [newExpense, ...prev]);
   };
 
+  const editExpense = async (id, updates) => {
+    if (user) {
+      try {
+        const { updateExpense } = await import('../services/db');
+        await updateExpense(id, updates);
+      } catch (err) {
+        console.error("Failed to update expense", err);
+        return;
+      }
+    }
+    
+    setExpenses(prev => prev.map(exp => 
+      exp.id === id ? { ...exp, ...updates } : exp
+    ));
+    // Note: Balances recalculation is complex for edits, requires full reload or deep state diffing. 
+    // For MVP, we just update the expense list.
+  };
+
+  const removeExpense = async (id) => {
+    if (user) {
+      try {
+        const { deleteExpense } = await import('../services/db');
+        await deleteExpense(id);
+      } catch (err) {
+        console.error("Failed to delete expense", err);
+        return;
+      }
+    }
+    
+    setExpenses(prev => prev.filter(exp => exp.id !== id));
+  };
+
   const value = {
     user,
     friends,
@@ -128,6 +160,8 @@ export const AppProvider = ({ children }) => {
     toggleTheme,
     addFriend,
     addExpense,
+    editExpense,
+    removeExpense,
     loadingData
   };
 
