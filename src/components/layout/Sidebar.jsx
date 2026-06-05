@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { LayoutDashboard, Receipt, UserPlus, Users, History, Settings, Info, LogOut, LogIn } from 'lucide-react';
 
 export const Sidebar = ({ onOpenModal }) => {
@@ -23,10 +23,10 @@ export const Sidebar = ({ onOpenModal }) => {
 
   return (
     <aside className="fixed top-0 left-0 bottom-0 w-[280px] bg-transparent border-r border-white/10 flex flex-col z-50 transition-transform hidden md:flex">
-      <div className="h-[96px] px-8 flex items-center gap-3 border-b border-white/10">
+      <Link to="/" className="h-[96px] px-8 flex items-center gap-3 border-b border-white/10 hover:opacity-80 transition-opacity">
         <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain filter invert brightness-0" />
         <div className="text-4xl text-white tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>Spendi</div>
-      </div>
+      </Link>
       
       <nav className="flex-1 px-4 py-8 flex flex-col gap-2 overflow-y-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
         <button onClick={() => navigate('/dashboard')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/dashboard') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>

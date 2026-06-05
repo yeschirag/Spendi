@@ -77,13 +77,24 @@ export const LandingPage = () => {
           <a href="#how-it-works" className="text-sm text-[#6F6F6F] hover:text-[#000000] transition-colors">How it Works</a>
           <a href="#about" className="text-sm text-[#6F6F6F] hover:text-[#000000] transition-colors">About</a>
         </div>
-        <button 
-          onClick={() => navigate(user ? '/dashboard' : '/auth')}
-          className="rounded-full px-6 py-2.5 text-sm bg-[#000000] text-[#FFFFFF] hover:scale-[1.03] transition-transform whitespace-nowrap"
-          style={{ fontFamily: "'Inter', sans-serif" }}
-        >
-          {user ? 'Go to Dashboard' : 'Begin Journey'}
-        </button>
+        <div className="flex items-center gap-6">
+          {!user && (
+            <button 
+              onClick={() => navigate('/auth')}
+              className="hidden md:block text-sm text-[#000000] hover:text-[#6F6F6F] transition-colors font-medium"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              Log in
+            </button>
+          )}
+          <button 
+            onClick={() => navigate(user ? '/dashboard' : '/auth')}
+            className="rounded-full px-6 py-2.5 text-sm bg-[#000000] text-[#FFFFFF] hover:scale-[1.03] transition-transform whitespace-nowrap"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            {user ? 'Go to Dashboard' : 'Begin Journey'}
+          </button>
+        </div>
       </nav>
 
       {/* Hero section (z-10) */}
