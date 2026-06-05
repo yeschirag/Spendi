@@ -57,16 +57,16 @@ export const HistoryPage = () => {
         </button>
       </div>
 
-      <div className="mb-10">
-        <h1 className="text-6xl md:text-8xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
+      <div className="mb-8 md:mb-10">
+        <h1 className="text-5xl md:text-8xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
           The Ledger.
         </h1>
-        <p className="text-white/50 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>A chronological history of all expenses.</p>
+        <p className="text-white/50 text-base md:text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>A chronological history of all expenses.</p>
       </div>
 
       {/* Controls Bar */}
-      <div className="flex flex-col md:flex-row gap-4 mb-8">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-4 mb-8">
+        <div className="relative w-full">
           <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" />
           <input 
             type="text" 
@@ -78,12 +78,12 @@ export const HistoryPage = () => {
           />
         </div>
         
-        <div className="flex gap-4">
-          <div className="relative">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+          <div className="relative w-full">
             <select 
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="appearance-none bg-white/5 border border-white/10 rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer capitalize"
+              className="w-full appearance-none bg-white/5 border border-white/10 rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer capitalize"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {uniqueCategories.map(cat => (
@@ -95,11 +95,11 @@ export const HistoryPage = () => {
             <SlidersHorizontal size={14} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
           </div>
 
-          <div className="relative">
+          <div className="relative w-full">
             <select 
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="appearance-none bg-white/5 border border-white/10 rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
+              className="w-full appearance-none bg-white/5 border border-white/10 rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               <option value="date-desc" className="bg-black text-white">Newest First</option>
@@ -133,34 +133,34 @@ export const HistoryPage = () => {
             </div>
           ) : (
             filteredAndSortedExpenses.map((expense) => (
-              <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-6 mb-4 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer shadow-lg">
-                <div className="flex items-center gap-6 flex-1 min-w-0 pr-8">
-                  <div className="hidden sm:flex w-16 h-16 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 items-center justify-center border border-white/10 shadow-inner">
-                    <span className="text-3xl text-white/80 font-medium font-serif">{expense.category.charAt(0).toUpperCase()}</span>
+              <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 mb-4 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer shadow-lg w-full max-w-full overflow-hidden">
+                <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0 md:pr-8 w-full">
+                  <div className="hidden sm:flex w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 items-center justify-center border border-white/10 shadow-inner">
+                    <span className="text-2xl md:text-3xl text-white/80 font-medium font-serif">{expense.category.charAt(0).toUpperCase()}</span>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-2xl text-white font-normal mb-2 tracking-tight truncate" style={{ fontFamily: "'Instrument Serif', serif" }}>{expense.title}</h4>
-                    <div className="flex flex-wrap items-center gap-3 text-xs text-white/40 font-light tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <span>{new Date(expense.date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span>
-                      <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                      <span className="capitalize text-white/60">{expense.category}</span>
-                      <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                      <span className="text-white/60 truncate">Paid by {expense.paidBy}</span>
-                      <span className="w-1 h-1 rounded-full bg-white/20"></span>
-                      <span className="truncate">Split with {expense.splitWith?.length > 0 ? expense.splitWith.join(', ') : 'No one'}</span>
+                  <div className="flex-1 min-w-0 w-full">
+                    <h4 className="text-xl md:text-2xl text-white font-normal mb-1 md:mb-2 tracking-tight truncate w-full" style={{ fontFamily: "'Instrument Serif', serif" }}>{expense.title}</h4>
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3 text-[10px] md:text-xs text-white/40 font-light tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <span className="whitespace-nowrap">{new Date(expense.date).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                      <span className="w-1 h-1 rounded-full bg-white/20 shrink-0"></span>
+                      <span className="capitalize text-white/60 whitespace-nowrap">{expense.category}</span>
+                      <span className="w-1 h-1 rounded-full bg-white/20 shrink-0"></span>
+                      <span className="text-white/60 truncate max-w-[80px] sm:max-w-none">By {expense.paidBy}</span>
+                      <span className="w-1 h-1 rounded-full bg-white/20 shrink-0"></span>
+                      <span className="truncate max-w-[80px] sm:max-w-none">With {expense.splitWith?.length > 0 ? expense.splitWith.join(', ') : 'No one'}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center justify-between md:justify-end gap-6 mt-6 md:mt-0">
-                  <div className="text-4xl text-white font-normal tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    ₹{expense.amount.toFixed(2)}
+                <div className="flex items-center justify-between md:justify-end gap-4 md:gap-6 mt-4 md:mt-0 w-full md:w-auto">
+                  <div className="text-3xl md:text-4xl text-white font-normal tracking-tight truncate" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                    ₹{expense.amount.toFixed(0)}
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); navigate(`/edit-expense/${expense.id}`); }} 
-                    className="md:opacity-0 group-hover:opacity-100 transition-all duration-300 p-3 bg-white/5 hover:bg-white/20 rounded-full text-white/70 hover:text-white border border-white/10"
+                    className="md:opacity-0 group-hover:opacity-100 transition-all duration-300 p-2.5 md:p-3 bg-white/5 hover:bg-white/20 rounded-full text-white/70 hover:text-white border border-white/10 shrink-0"
                     title="Edit Expense"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
                   </button>
                 </div>
               </div>

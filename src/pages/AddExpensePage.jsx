@@ -39,7 +39,7 @@ export const AddExpensePage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 md:p-16 max-w-7xl mx-auto w-full bg-transparent animate-fade-in flex flex-col">
+    <div className="flex-1 p-6 md:p-16 max-w-7xl mx-auto w-full bg-transparent animate-fade-in flex flex-col pb-32 md:pb-16">
       
       <div className="mb-12">
         <button 

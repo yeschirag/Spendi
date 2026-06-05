@@ -34,7 +34,7 @@ export const FriendsPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in">
+    <div className="flex-1 p-6 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in pb-32 md:pb-16">
       
       <button 
         onClick={() => navigate('/dashboard')}

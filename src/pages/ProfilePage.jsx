@@ -12,10 +12,22 @@ export const ProfilePage = () => {
   const avatarUrl = user?.user_metadata?.avatar_url || null;
 
   return (
-    <div className="flex-1 p-8 md:p-16 flex flex-col gap-12 max-w-4xl mx-auto w-full bg-transparent">
+    <div className="flex-1 p-6 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent pb-32 md:pb-16 animate-fade-in">
       
-      {/* Header */}
-      <div className="flex flex-col md:flex-row items-center md:items-end gap-8 border-b border-white/10 pb-12">
+      <div className="mb-12">
+        <button 
+          onClick={() => window.history.back()}
+          className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm uppercase tracking-widest font-medium w-fit"
+          style={{ fontFamily: "'Inter', sans-serif" }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>
+          Back
+        </button>
+      </div>
+
+      <div className="max-w-4xl mx-auto w-full flex flex-col gap-12">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-8 border-b border-white/10 pb-12">
         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center shrink-0 shadow-2xl">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
@@ -101,6 +113,7 @@ export const ProfilePage = () => {
         </div>
       </div>
 
+      </div>
     </div>
   );
 };
