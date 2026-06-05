@@ -24,6 +24,7 @@ function MainLayout({ children }) {
   const { loadingData } = useAppContext();
 
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+  const closeSidebar = () => setIsSidebarOpen(false);
 
   if (loadingData) {
     return (
@@ -38,7 +39,7 @@ function MainLayout({ children }) {
 
   return (
     <div className="flex min-h-screen bg-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/[0.03] via-black to-black text-white font-body selection:bg-white/20">
-      <Sidebar />
+      <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       
       <main className="flex-1 flex flex-col min-h-screen ml-0 md:ml-[280px]">
         <Header onToggleMenu={toggleSidebar} />

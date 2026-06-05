@@ -1,16 +1,33 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { StatCard } from './StatCard';
 import { useAppContext } from '../../context/AppContext';
 import { Wallet, TrendingDown, TrendingUp, Users, User, ArrowRight, Plus, Receipt } from 'lucide-react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 export const Dashboard = () => {
   const { expenses, balances, friends, user } = useAppContext();
   const navigate = useNavigate();
+
+  const [greetingIndex, setGreetingIndex] = useState(0);
+  const greetings = [
+    "Welcome",
+    "नमस्ते",
+    "வணக்கம்",
+    "Hola",
+    "Bonjour"
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setGreetingIndex((prev) => (prev + 1) % greetings.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
@@ -116,17 +133,29 @@ export const Dashboard = () => {
   const firstName = fullName ? fullName.split(' ')[0] : (user?.email ? user.email.split('@')[0] : 'User');
 
   return (
-    <div className="flex-1 p-8 md:p-16 flex flex-col gap-8 max-w-7xl mx-auto w-full bg-transparent">
+    <div className="flex-1 p-5 pt-6 md:p-16 flex flex-col gap-6 md:gap-8 max-w-7xl mx-auto w-full bg-transparent">
       {/* Header Area */}
-      <div className="mb-8">
-        <h1 className="text-6xl md:text-8xl text-white font-normal tracking-tight drop-shadow-2xl" style={{ fontFamily: "'Instrument Serif', serif" }}>
-          Welcome back, {firstName}.
-        </h1>
-        <p className="text-white/50 mt-4 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>Here is your financial state.</p>
+      <div className="mb-4 md:mb-8">
+        <div className="grid w-full" style={{ gridTemplateAreas: "'greeting'" }}>
+          <AnimatePresence>
+            <motion.h1
+              key={greetingIndex}
+              initial={{ y: 30, opacity: 0, filter: 'blur(8px)' }}
+              animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+              exit={{ y: -30, opacity: 0, filter: 'blur(8px)' }}
+              transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+              className="text-4xl sm:text-6xl md:text-8xl text-white font-normal tracking-tight drop-shadow-2xl pb-2 leading-[1.1] w-full break-words whitespace-normal"
+              style={{ fontFamily: "'Instrument Serif', serif", gridArea: 'greeting' }}
+            >
+              {greetings[greetingIndex]}, {firstName}.
+            </motion.h1>
+          </AnimatePresence>
+        </div>
+        <p className="text-white/50 mt-[3rem] sm:mt-[4.5rem] md:mt-[6rem] text-sm md:text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>Here is your financial state.</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
         <StatCard
           color="blue"
           title="Personal Expenses"
@@ -156,8 +185,8 @@ export const Dashboard = () => {
       </div>
 
       {/* Dashboard Insights */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-8">
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 group">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 mt-4 md:mt-8">
+        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8 group">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Spending Overview.</h3>
             <span className="flex items-center gap-1.5 px-3 py-1 bg-white/10 text-white/70 rounded-full text-xs font-medium tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>This Month</span>
@@ -167,7 +196,7 @@ export const Dashboard = () => {
           </div>
         </div>
         
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 group">
+        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8 group">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>By Category.</h3>
           </div>
@@ -184,8 +213,8 @@ export const Dashboard = () => {
       </div>
 
       {/* Cards Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-12">
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 mt-6 md:mt-12">
+        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Friend Balances.</h2>
             <button className="text-xs uppercase tracking-wider font-medium text-white/40 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }} onClick={() => navigate('/friends')}>Manage</button>
@@ -216,7 +245,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8">
+        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Recent Expenses.</h2>
             <button className="text-xs uppercase tracking-wider font-medium text-white/40 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }} onClick={() => navigate('/history')}>View All</button>
