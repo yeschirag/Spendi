@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
+import { FriendProvider } from './context/FriendContext';
 import { Sidebar } from './components/layout/Sidebar';
 import { BottomNav } from './components/layout/BottomNav';
 import { Header } from './components/layout/Header';
@@ -68,22 +69,24 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   return (
     <AuthProvider>
-      <AppProvider>
-        <SmoothScroll>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/auth" element={<AuthPage />} />
-              <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
-              <Route path="/add-expense" element={<ProtectedRoute><MainLayout><AddExpensePage /></MainLayout></ProtectedRoute>} />
-              <Route path="/edit-expense/:id" element={<ProtectedRoute><MainLayout><EditExpensePage /></MainLayout></ProtectedRoute>} />
-              <Route path="/friends" element={<ProtectedRoute><MainLayout><FriendsPage /></MainLayout></ProtectedRoute>} />
-              <Route path="/history" element={<ProtectedRoute><MainLayout><HistoryPage /></MainLayout></ProtectedRoute>} />
-              <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />
-            </Routes>
-          </BrowserRouter>
-        </SmoothScroll>
-      </AppProvider>
+      <FriendProvider>
+        <AppProvider>
+          <SmoothScroll>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/auth" element={<AuthPage />} />
+                <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
+                <Route path="/add-expense" element={<ProtectedRoute><MainLayout><AddExpensePage /></MainLayout></ProtectedRoute>} />
+                <Route path="/edit-expense/:id" element={<ProtectedRoute><MainLayout><EditExpensePage /></MainLayout></ProtectedRoute>} />
+                <Route path="/friends" element={<ProtectedRoute><MainLayout><FriendsPage /></MainLayout></ProtectedRoute>} />
+                <Route path="/history" element={<ProtectedRoute><MainLayout><HistoryPage /></MainLayout></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />
+              </Routes>
+            </BrowserRouter>
+          </SmoothScroll>
+        </AppProvider>
+      </FriendProvider>
     </AuthProvider>
   );
 }

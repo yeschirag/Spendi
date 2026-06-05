@@ -544,3 +544,40 @@ CREATE TRIGGER on_settlement_created
     AFTER INSERT ON public.settlements
     FOR EACH ROW
     EXECUTE FUNCTION public.notify_settlement();
+
+-- ============================================================
+-- Migration 012: Search Users RPC
+-- ============================================================
+
+CREATE OR REPLACE FUNCTION public.search_users(search_term TEXT)
+RETURNS TABLE (
+    id UUID,
+    email TEXT,
+    full_name TEXT,
+    display_name TEXT,
+    avatar_url TEXT
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        p.id, 
+        p.email, 
+        p.full_name, 
+        p.display_name, 
+        p.avatar_url
+    FROM public.profiles p
+    WHERE 
+        p.id != auth.uid() -- Exclude the current user
+        AND p.is_active = true
+        AND (
+            p.email ILIKE '%' || search_term || '%'
+            OR p.full_name ILIKE '%' || search_term || '%'
+            OR p.display_name ILIKE '%' || search_term || '%'
+        )
+    LIMIT 10;
+END;
+$$;

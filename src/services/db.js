@@ -175,7 +175,17 @@ export const deleteExpense = async (id) => {
   return true;
 };
 
-export const getFriendsAndBalances = async () => {
+export const searchUsers = async (query) => {
+  if (!query || query.trim().length < 2) return [];
+  const { data, error } = await supabase.rpc('search_users', { search_term: query.trim() });
+  if (error) {
+    console.error('Error searching users:', error);
+    throw error;
+  }
+  return data || [];
+};
+
+export const getFriendships = async () => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return [];
 
@@ -184,30 +194,71 @@ export const getFriendsAndBalances = async () => {
     .select(`
       id,
       status,
-      requester:profiles!requester_id(id, full_name, display_name, email),
-      addressee:profiles!addressee_id(id, full_name, display_name, email)
+      requester_id,
+      addressee_id,
+      requester:profiles!requester_id(id, full_name, display_name, email, avatar_url),
+      addressee:profiles!addressee_id(id, full_name, display_name, email, avatar_url)
     `)
-    .eq('status', 'accepted')
     .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
 
   if (error) {
-    console.error('Error fetching friends:', error);
+    console.error('Error fetching friendships:', error);
     throw error;
   }
+  return data || [];
+};
+
+export const sendFriendRequest = async (addresseeId) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const { data, error } = await supabase
+    .from('friendships')
+    .insert({
+      requester_id: user.id,
+      addressee_id: addresseeId,
+      status: 'pending'
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const updateFriendRequestStatus = async (friendshipId, status) => {
+  const { data, error } = await supabase
+    .from('friendships')
+    .update({ status })
+    .eq('id', friendshipId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+export const deleteFriendship = async (friendshipId) => {
+  const { error } = await supabase
+    .from('friendships')
+    .delete()
+    .eq('id', friendshipId);
+
+  if (error) throw error;
+  return true;
+};
+
+export const getFriendsAndBalances = async () => {
+  // Legacy method used by AppContext (temporarily kept)
+  const friendships = await getFriendships();
+  const { data: { user } } = await supabase.auth.getUser();
   
-  return data.map(f => {
-    const friendProfile = f.requester.id === user.id ? f.addressee : f.requester;
-    return { name: getProfileName(friendProfile), id: friendProfile.id };
+  const accepted = friendships.filter(f => f.status === 'accepted');
+  return accepted.map(f => {
+    const friendProfile = f.requester_id === user?.id ? f.addressee : f.requester;
+    return { 
+      name: friendProfile.display_name || friendProfile.full_name || friendProfile.email, 
+      id: friendProfile.id 
+    };
   });
-};
-
-export const addFriend = async (name) => {
-  // The new schema requires finding a user by email, not arbitrarily creating a string-based friend.
-  // So adding a friend by name alone won't work in the new strict architecture.
-  // We throw a clear error to migrate the UI later.
-  throw new Error("Legacy addFriend not supported. Please use email-based friend search.");
-};
-
-export const removeFriend = async (name) => {
-  throw new Error("Legacy removeFriend not supported. Requires ID.");
 };

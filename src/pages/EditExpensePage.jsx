@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit2 } from 'lucide-react';
 
 export const EditExpensePage = () => {
   const { expenses, editExpense, removeExpense } = useAppContext();
   const navigate = useNavigate();
   const { id } = useParams();
   
+  const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
@@ -33,7 +34,7 @@ export const EditExpensePage = () => {
       date: new Date(date).toISOString(),
     });
     
-    navigate('/history');
+    setIsEditing(false);
   };
 
   const handleDelete = () => {
@@ -53,7 +54,7 @@ export const EditExpensePage = () => {
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <ArrowLeft size={16} />
-          Cancel
+          {isEditing ? 'Cancel Edit' : 'Back'}
         </button>
         <button 
           onClick={handleDelete}
@@ -67,10 +68,12 @@ export const EditExpensePage = () => {
 
       <div className="max-w-3xl mx-auto w-full">
         <div className="mb-12">
-          <h1 className="text-6xl md:text-8xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
-            Edit.
+          <h1 className="text-5xl md:text-8xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            {isEditing ? 'Edit.' : 'Details.'}
           </h1>
-          <p className="text-white/50 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>Update the details of your expense.</p>
+          <p className="text-white/50 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {isEditing ? 'Update the details of your expense.' : 'View expense details.'}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-8">
@@ -83,9 +86,10 @@ export const EditExpensePage = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Dinner at the space station"
-              className="w-full bg-transparent border-b border-white/20 pb-4 text-3xl text-white placeholder-white/20 focus:outline-none focus:border-white transition-colors"
+              className={`w-full bg-transparent border-b pb-4 text-3xl text-white placeholder-white/20 focus:outline-none transition-colors ${isEditing ? 'border-white/20 focus:border-white' : 'border-transparent cursor-default'}`}
               style={{ fontFamily: "'Instrument Serif', serif" }}
-              autoFocus
+              readOnly={!isEditing}
+              autoFocus={isEditing}
             />
           </div>
 
@@ -99,8 +103,9 @@ export const EditExpensePage = () => {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="0.00"
-                className="w-full bg-transparent border-b border-white/20 pb-4 pl-8 text-3xl text-white placeholder-white/20 focus:outline-none focus:border-white transition-colors"
+                className={`w-full bg-transparent border-b pb-4 pl-8 text-3xl text-white placeholder-white/20 focus:outline-none transition-colors ${isEditing ? 'border-white/20 focus:border-white' : 'border-transparent cursor-default'}`}
                 style={{ fontFamily: "'Instrument Serif', serif" }}
+                readOnly={!isEditing}
               />
             </div>
           </div>
@@ -112,28 +117,46 @@ export const EditExpensePage = () => {
               type="date" 
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full bg-transparent border-b border-white/20 pb-4 text-xl text-white focus:outline-none focus:border-white transition-colors"
+              className={`w-full bg-transparent border-b pb-4 text-xl text-white focus:outline-none transition-colors ${isEditing ? 'border-white/20 focus:border-white' : 'border-transparent cursor-default'}`}
               style={{ fontFamily: "'Inter', sans-serif", colorScheme: "dark" }}
+              readOnly={!isEditing}
             />
           </div>
           
           {/* Note on disabled fields */}
-          <div className="p-4 bg-white/5 rounded-2xl border border-white/5 mt-4">
-            <p className="text-sm text-white/40 tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Note: Category, Paid By, and Splits cannot be edited for an existing expense in this version.
-            </p>
-          </div>
+          {isEditing && (
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 mt-4">
+              <p className="text-sm text-white/40 tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Note: Category, Paid By, and Splits cannot be edited for an existing expense in this version.
+              </p>
+            </div>
+          )}
 
-          {/* Submit */}
+          {/* Actions */}
           <div className="mt-12 flex justify-end">
-            <button 
-              type="submit"
-              disabled={!title || !amount}
-              className="bg-white text-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
-              style={{ fontFamily: "'Inter', sans-serif" }}
-            >
-              Save Changes
-            </button>
+            {isEditing ? (
+              <button 
+                type="submit"
+                disabled={!title || !amount}
+                className="bg-white text-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                Save Changes
+              </button>
+            ) : (
+              <button 
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  setIsEditing(true);
+                }}
+                className="bg-white/10 text-white px-10 py-4 rounded-full text-sm font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                <Edit2 size={16} />
+                Edit Expense
+              </button>
+            )}
           </div>
 
         </form>

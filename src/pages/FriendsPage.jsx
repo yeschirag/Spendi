@@ -1,37 +1,67 @@
-import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, UserPlus, Trash2 } from 'lucide-react';
-import * as db from '../services/db';
+import { ArrowLeft, Search, UserPlus, Check, X, Trash2, Clock } from 'lucide-react';
+import { useFriends } from '../context/FriendContext';
+import { searchUsers } from '../services/db';
 
 export const FriendsPage = () => {
-  const { friends, balances, addFriend } = useAppContext();
   const navigate = useNavigate();
+  const { friends, incomingRequests, outgoingRequests, loading, sendRequest, acceptRequest, rejectRequest, removeFriend } = useFriends();
   
-  const [name, setName] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'add', 'requests'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [searching, setSearching] = useState(false);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const success = await addFriend(name.trim());
-      if (success) {
-        setName('');
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim().length >= 2) {
+        setSearching(true);
+        try {
+          const results = await searchUsers(searchQuery);
+          setSearchResults(results);
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setSearching(false);
+        }
       } else {
-        setError("Friend already exists or invalid name.");
+        setSearchResults([]);
       }
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
+
+  const handleSendRequest = async (userId) => {
+    try {
+      await sendRequest(userId);
+      setSearchResults(prev => prev.filter(u => u.id !== userId));
     } catch (err) {
-      setError("Failed to add friend.");
-    } finally {
-      setLoading(false);
+      console.error(err);
+      alert("Failed to send request.");
     }
   };
+
+  const TabButton = ({ id, label, badgeCount }) => (
+    <button
+      onClick={() => setActiveTab(id)}
+      className={`relative px-6 py-3 text-sm font-medium tracking-wide uppercase transition-colors ${
+        activeTab === id ? 'text-white' : 'text-white/40 hover:text-white/70'
+      }`}
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
+      {label}
+      {badgeCount > 0 && (
+        <span className="ml-2 bg-white text-black text-xs px-2 py-0.5 rounded-full font-bold">
+          {badgeCount}
+        </span>
+      )}
+      {activeTab === id && (
+        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white"></div>
+      )}
+    </button>
+  );
 
   return (
     <div className="flex-1 p-6 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in pb-32 md:pb-16">
@@ -42,91 +72,217 @@ export const FriendsPage = () => {
         style={{ fontFamily: "'Inter', sans-serif" }}
       >
         <ArrowLeft size={16} />
-        Back to Dashboard
+        Back
       </button>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 mb-16">
-        <div>
-          <h1 className="text-6xl md:text-8xl text-white font-normal tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
-            Network.
-          </h1>
-          <p className="text-white/50 mt-4 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>Manage your friends and balances.</p>
-        </div>
+      <div className="mb-12">
+        <h1 className="text-6xl md:text-8xl text-white font-normal tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
+          Network.
+        </h1>
+        <p className="text-white/50 mt-4 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>Manage your friends and connections.</p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16" style={{ fontFamily: "'Inter', sans-serif" }}>
-        
-        {/* Add Friend Form */}
-        <div className="lg:col-span-5">
-          <div className="bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
-            <h2 className="text-2xl text-white font-normal mb-8 relative z-10" style={{ fontFamily: "'Instrument Serif', serif" }}>Add a Connection</h2>
-            
-            <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-              {error && (
-                <div className="bg-red-500/10 text-red-400 text-sm p-4 rounded-xl border border-red-500/20">
-                  {error}
-                </div>
-              )}
-              
-              <div className="flex flex-col gap-3">
-                <label htmlFor="friendName" className="text-sm font-light text-white/50 tracking-wide uppercase">Friend's Name</label>
-                <input type="text" id="friendName" placeholder="e.g., Jane Doe" required value={name} onChange={(e) => setName(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl px-6 py-5 text-white placeholder:text-white/20 focus:outline-none focus:border-white transition-colors text-lg" />
-              </div>
-              
-              <button type="submit" disabled={loading} className="w-full py-4 rounded-full text-lg font-medium bg-white text-black hover:bg-white/90 hover:scale-[1.01] transition-all shadow-xl disabled:opacity-50 flex items-center justify-center gap-2 mt-4">
-                <UserPlus size={20} />
-                {loading ? 'Adding...' : 'Add Friend'}
-              </button>
-            </form>
-          </div>
-        </div>
+      {/* Tabs Header */}
+      <div className="flex border-b border-white/10 mb-8 overflow-x-auto hide-scrollbar">
+        <TabButton id="friends" label="My Friends" badgeCount={friends.length} />
+        <TabButton id="add" label="Add Friend" />
+        <TabButton id="requests" label="Requests" badgeCount={incomingRequests.length} />
+      </div>
 
-        {/* Friends List */}
-        <div className="lg:col-span-7">
-          <h2 className="text-sm font-light text-white/50 tracking-widest uppercase mb-8">Your Network</h2>
-          
-          <div className="flex flex-col gap-4">
-            {friends.length === 0 ? (
-              <div className="p-8 border border-white/5 rounded-[2rem] text-center text-white/30 font-light">
-                No friends added yet.
+      <div className="flex-1">
+        {/* TAB: MY FRIENDS */}
+        {activeTab === 'friends' && (
+          <div className="flex flex-col gap-4 animate-fade-in">
+            {loading ? (
+              <p className="text-white/50">Loading...</p>
+            ) : friends.length === 0 ? (
+              <div className="p-12 border border-white/5 rounded-3xl text-center text-white/30 font-light flex flex-col items-center gap-4">
+                <Search size={32} className="opacity-50" />
+                <p>You haven't added any friends yet.</p>
+                <button onClick={() => setActiveTab('add')} className="mt-2 text-white/70 hover:text-white underline underline-offset-4">Find friends</button>
               </div>
             ) : (
-              friends.map(friend => {
-                const balance = balances[friend] || 0;
-                const isOwed = balance > 0;
-                const isOwing = balance < 0;
-                
-                return (
-                  <div key={friend} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-all group">
-                    <div className="flex items-center gap-5">
-                      <div className="w-12 h-12 rounded-full bg-white/10 flex items-center justify-center text-xl text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                        {friend.charAt(0).toUpperCase()}
-                      </div>
-                      <span className="text-xl text-white font-medium">{friend}</span>
+              friends.map(friend => (
+                <div key={friend.friendshipId} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group">
+                  <div className="flex items-center gap-5">
+                    <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                      {friend.avatar_url ? (
+                        <img src={friend.avatar_url} alt={friend.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-xl text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                          {(friend.display_name || friend.full_name || friend.email).charAt(0).toUpperCase()}
+                        </span>
+                      )}
                     </div>
-                    
-                    <div className="flex items-center gap-6">
-                      <div className="text-right">
-                        {balance === 0 ? (
-                          <span className="text-white/30 text-sm tracking-wide uppercase">Settled up</span>
-                        ) : isOwed ? (
-                          <div className="flex flex-col">
-                            <span className="text-green-400 font-medium text-lg">owes you ₹{Math.abs(balance).toFixed(0)}</span>
-                          </div>
-                        ) : (
-                          <div className="flex flex-col">
-                            <span className="text-red-400 font-medium text-lg">you owe ₹{Math.abs(balance).toFixed(0)}</span>
-                          </div>
-                        )}
-                      </div>
+                    <div>
+                      <span className="text-lg text-white font-medium block">{friend.display_name || friend.full_name}</span>
+                      <span className="text-sm text-white/40 block font-light">{friend.email}</span>
                     </div>
                   </div>
-                );
-              })
+                  
+                  <button 
+                    onClick={() => {
+                      if(window.confirm(`Remove ${friend.display_name || friend.full_name} from friends?`)) {
+                        removeFriend(friend.friendshipId);
+                      }
+                    }}
+                    className="p-3 text-red-400/50 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                    title="Remove Friend"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
+              ))
             )}
           </div>
-        </div>
+        )}
+
+        {/* TAB: ADD FRIENDS */}
+        {activeTab === 'add' && (
+          <div className="flex flex-col gap-8 animate-fade-in">
+            <div className="relative group">
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/30 group-focus-within:text-white transition-colors" size={20} />
+              <input 
+                type="text" 
+                placeholder="Search by email or name..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-full py-5 pl-16 pr-6 text-white placeholder-white/30 focus:outline-none focus:border-white/40 focus:bg-white/10 transition-all text-lg"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+                autoFocus
+              />
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {searching ? (
+                <p className="text-white/50 text-center py-8">Searching...</p>
+              ) : searchQuery.length >= 2 && searchResults.length === 0 ? (
+                <p className="text-white/50 text-center py-8">No users found.</p>
+              ) : (
+                searchResults.map(user => (
+                  <div key={user.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
+                    <div className="flex items-center gap-5">
+                      <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                        {user.avatar_url ? (
+                          <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xl text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                            {(user.display_name || user.full_name || user.email).charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-lg text-white font-medium block">{user.display_name || user.full_name}</span>
+                        <span className="text-sm text-white/40 block font-light">{user.email}</span>
+                      </div>
+                    </div>
+                    
+                    <button 
+                      onClick={() => handleSendRequest(user.id)}
+                      className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                    >
+                      <UserPlus size={16} />
+                      Add
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB: REQUESTS */}
+        {activeTab === 'requests' && (
+          <div className="flex flex-col gap-12 animate-fade-in">
+            
+            {/* Incoming */}
+            <div>
+              <h3 className="text-sm font-light text-white/40 uppercase tracking-widest mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>Incoming Requests ({incomingRequests.length})</h3>
+              <div className="flex flex-col gap-4">
+                {incomingRequests.length === 0 ? (
+                  <p className="text-white/30 text-sm font-light italic">No pending incoming requests.</p>
+                ) : (
+                  incomingRequests.map(req => {
+                    const profile = req.requester;
+                    return (
+                      <div key={req.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
+                        <div className="flex items-center gap-5">
+                          <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                            {profile?.avatar_url ? (
+                              <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-xl text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                                {(profile?.display_name || profile?.full_name || profile?.email || '?').charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <span className="text-lg text-white font-medium block">{profile?.display_name || profile?.full_name}</span>
+                            <span className="text-sm text-white/40 block font-light">{profile?.email}</span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <button 
+                            onClick={() => acceptRequest(req.id)}
+                            className="p-3 bg-white text-black rounded-full hover:scale-105 transition-transform"
+                            title="Accept"
+                          >
+                            <Check size={18} />
+                          </button>
+                          <button 
+                            onClick={() => rejectRequest(req.id)}
+                            className="p-3 bg-white/10 text-white hover:bg-white/20 rounded-full transition-colors"
+                            title="Decline"
+                          >
+                            <X size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Outgoing */}
+            <div>
+              <h3 className="text-sm font-light text-white/40 uppercase tracking-widest mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>Sent Requests ({outgoingRequests.length})</h3>
+              <div className="flex flex-col gap-4">
+                {outgoingRequests.length === 0 ? (
+                  <p className="text-white/30 text-sm font-light italic">No pending outgoing requests.</p>
+                ) : (
+                  outgoingRequests.map(req => {
+                    const profile = req.addressee;
+                    return (
+                      <div key={req.id} className="flex items-center justify-between p-4 bg-transparent border border-white/5 rounded-2xl opacity-70">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                            {profile?.avatar_url ? (
+                              <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
+                            ) : (
+                              <span className="text-lg text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                                {(profile?.display_name || profile?.full_name || profile?.email || '?').charAt(0).toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+                          <div>
+                            <span className="text-white font-medium block">{profile?.display_name || profile?.full_name}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 text-white/30 text-sm">
+                          <Clock size={14} />
+                          Pending
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+          </div>
+        )}
 
       </div>
     </div>
