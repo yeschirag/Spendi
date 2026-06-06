@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, UserPlus, Check, X, Trash2, Clock } from 'lucide-react';
 import { useFriends } from '../context/FriendContext';
 import { useAppContext } from '../context/AppContext';
+import { useAuth } from '../context/AuthContext';
 import { searchUsers } from '../services/db';
 
 export const FriendsPage = () => {
   const navigate = useNavigate();
   const { friends, incomingRequests, outgoingRequests, loading, sendRequest, acceptRequest, rejectRequest, removeFriend } = useFriends();
   const { balances } = useAppContext();
+  const { user: currentUser } = useAuth();
   
   const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'add', 'requests'
   const [searchQuery, setSearchQuery] = useState('');
@@ -177,7 +179,12 @@ export const FriendsPage = () => {
               ) : searchQuery.length >= 2 && searchResults.length === 0 ? (
                 <p className="text-white/50 text-center py-8">No users found.</p>
               ) : (
-                searchResults.map(user => (
+                searchResults.filter(u => !currentUser || u.id !== currentUser.id).map(user => {
+                  const isFriend = friends.some(f => f.id === user.id);
+                  const hasOutgoing = outgoingRequests.some(r => r.addressee_id === user.id);
+                  const hasIncoming = incomingRequests.some(r => r.requester_id === user.id);
+
+                  return (
                   <div key={user.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
                     <div className="flex items-center gap-5">
                       <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
@@ -195,15 +202,38 @@ export const FriendsPage = () => {
                       </div>
                     </div>
                     
-                    <button 
-                      onClick={() => handleSendRequest(user.id)}
-                      className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-                    >
-                      <UserPlus size={16} />
-                      Add
-                    </button>
+                    {isFriend ? (
+                      <button disabled className="px-6 py-2.5 bg-white/10 text-white/50 rounded-full text-sm font-medium cursor-not-allowed flex items-center gap-2">
+                        <Check size={16} />
+                        Friends
+                      </button>
+                    ) : hasOutgoing ? (
+                      <button disabled className="px-6 py-2.5 bg-white/10 text-white/50 rounded-full text-sm font-medium cursor-not-allowed flex items-center gap-2">
+                        <Clock size={16} />
+                        Request Sent
+                      </button>
+                    ) : hasIncoming ? (
+                      <button 
+                        onClick={() => {
+                          const req = incomingRequests.find(r => r.requester_id === user.id);
+                          if(req) acceptRequest(req.id);
+                        }}
+                        className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                      >
+                        <Check size={16} />
+                        Accept
+                      </button>
+                    ) : (
+                      <button 
+                        onClick={() => handleSendRequest(user.id)}
+                        className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                      >
+                        <UserPlus size={16} />
+                        Add
+                      </button>
+                    )}
                   </div>
-                ))
+                )})
               )}
             </div>
           </div>
