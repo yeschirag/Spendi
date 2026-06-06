@@ -53,11 +53,11 @@ export const Sidebar = ({ isOpen, onClose }) => {
             <LayoutDashboard size={18} strokeWidth={2} />
             Dashboard
           </button>
-          <button onClick={() => handleNav('/add-expense')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/add-expense') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleNav('/add-expense')} className={`tour-add-expense flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/add-expense') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
             <Receipt size={18} strokeWidth={2} />
             Add Expense
           </button>
-          <button onClick={() => handleNav('/friends')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/friends') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleNav('/friends')} className={`tour-network flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/friends') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
             <Users size={18} strokeWidth={2} />
             Network
           </button>

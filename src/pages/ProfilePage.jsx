@@ -87,9 +87,21 @@ export const ProfilePage = () => {
               <span className="text-white/50">Theme</span>
               <span className="text-white">Luxury Dark</span>
             </div>
-            <div className="flex justify-between pt-2">
+            <div className="flex justify-between border-b border-white/5 pb-4">
               <span className="text-white/50">Notifications</span>
               <span className="text-white">Enabled</span>
+            </div>
+            <div className="flex justify-between pt-2">
+              <span className="text-white/50">App Tour</span>
+              <button 
+                onClick={() => {
+                  localStorage.removeItem('spendi_tour_completed');
+                  window.location.href = '/dashboard';
+                }}
+                className="text-white font-medium hover:text-white/70 underline underline-offset-4 transition-colors"
+              >
+                Replay Walkthrough
+              </button>
             </div>
           </div>
         </div>

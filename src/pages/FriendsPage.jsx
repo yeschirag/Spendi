@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, UserPlus, Check, X, Trash2, Clock } from 'lucide-react';
 import { useFriends } from '../context/FriendContext';
+import { useAppContext } from '../context/AppContext';
 import { searchUsers } from '../services/db';
 
 export const FriendsPage = () => {
   const navigate = useNavigate();
   const { friends, incomingRequests, outgoingRequests, loading, sendRequest, acceptRequest, rejectRequest, removeFriend } = useFriends();
+  const { balances } = useAppContext();
   
   const [activeTab, setActiveTab] = useState('friends'); // 'friends', 'add', 'requests'
   const [searchQuery, setSearchQuery] = useState('');
@@ -102,37 +104,53 @@ export const FriendsPage = () => {
                 <button onClick={() => setActiveTab('add')} className="mt-2 text-white/70 hover:text-white underline underline-offset-4">Find friends</button>
               </div>
             ) : (
-              friends.map(friend => (
-                <div key={friend.friendshipId} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group">
-                  <div className="flex items-center gap-5">
-                    <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
-                      {friend.avatar_url ? (
-                        <img src={friend.avatar_url} alt={friend.full_name} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-xl text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                          {(friend.display_name || friend.full_name || friend.email).charAt(0).toUpperCase()}
-                        </span>
-                      )}
+              friends.map(friend => {
+                const friendName = friend.display_name || friend.full_name;
+                const owesYou = balances?.owesYou?.find(b => b.name === friendName)?.amount || 0;
+                const youOwe = balances?.youOwe?.find(b => b.name === friendName)?.amount || 0;
+                const isSettled = owesYou === 0 && youOwe === 0;
+
+                return (
+                  <div key={friend.friendshipId} onClick={() => navigate(`/friend/${friend.id}`)} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer">
+                    <div className="flex items-center gap-5 flex-1 min-w-0">
+                      <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                        {friend.avatar_url ? (
+                          <img src={friend.avatar_url} alt={friend.full_name} className="w-full h-full object-cover" />
+                        ) : (
+                          <span className="text-xl text-white font-medium" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                            {(friend.display_name || friend.full_name || friend.email).charAt(0).toUpperCase()}
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-lg text-white font-medium block truncate">{friendName}</span>
+                        <div className="flex items-center gap-3 mt-1 flex-wrap">
+                          {isSettled ? (
+                            <span className="text-xs text-white/40 uppercase tracking-widest font-medium shrink-0">Settled up</span>
+                          ) : youOwe > 0 ? (
+                            <span className="text-xs text-red-400 uppercase tracking-widest font-medium shrink-0">You owe ₹{youOwe.toFixed(2)}</span>
+                          ) : (
+                            <span className="text-xs text-green-400 uppercase tracking-widest font-medium shrink-0">Owes you ₹{owesYou.toFixed(2)}</span>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <span className="text-lg text-white font-medium block">{friend.display_name || friend.full_name}</span>
-                      <span className="text-sm text-white/40 block font-light">{friend.email}</span>
-                    </div>
+                    
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if(window.confirm(`Remove ${friendName} from friends?`)) {
+                          removeFriend(friend.friendshipId);
+                        }
+                      }}
+                      className="p-3 text-red-400/50 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                      title="Remove Friend"
+                    >
+                      <Trash2 size={18} />
+                    </button>
                   </div>
-                  
-                  <button 
-                    onClick={() => {
-                      if(window.confirm(`Remove ${friend.display_name || friend.full_name} from friends?`)) {
-                        removeFriend(friend.friendshipId);
-                      }
-                    }}
-                    className="p-3 text-red-400/50 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
-                    title="Remove Friend"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         )}

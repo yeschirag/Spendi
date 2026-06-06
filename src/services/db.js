@@ -17,7 +17,7 @@ export const getExpenses = async () => {
     .from('expenses')
     .select(`
       *,
-      category:categories(name),
+      category:categories(name, slug),
       expense_participants (
         user_id,
         amount_paid,
@@ -37,18 +37,18 @@ export const getExpenses = async () => {
   return data.map(exp => {
     let paidBy = 'You';
     const splitWith = [];
+    const splitsData = {};
     
     if (exp.expense_participants) {
       exp.expense_participants.forEach(p => {
         const isMe = p.user_id === user.id;
         const name = isMe ? 'You' : getProfileName(p.profiles);
         
-        // If they are part of the split
         if (p.amount_owed > 0 || p.amount_paid > 0) {
           splitWith.push(name);
+          splitsData[name] = p.amount_owed;
         }
         
-        // Who paid?
         if (p.amount_paid > 0) {
           paidBy = name;
         }
@@ -57,9 +57,12 @@ export const getExpenses = async () => {
 
     return {
       ...exp,
-      category: exp.category?.name || 'Other',
+      category: exp.category?.slug || 'other',
+      categoryName: exp.category?.name || 'Other',
       paidBy,
-      splitWith
+      splitType: exp.split_type || 'equal',
+      splitWith,
+      splitsData
     };
   });
 };
@@ -68,20 +71,17 @@ export const addExpense = async (expenseData) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
 
-  const { title, amount, date, category, paidBy, splitWith } = expenseData;
+  const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {} } = expenseData;
 
-  // 1. Find category ID (or default to Other)
   let categoryId = null;
-  const { data: catData } = await supabase.from('categories').select('id').ilike('name', category).limit(1).maybeSingle();
+  const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).limit(1).maybeSingle();
   if (catData) {
     categoryId = catData.id;
   } else {
-    // Fallback to 'other'
     const { data: otherCat } = await supabase.from('categories').select('id').eq('slug', 'other').maybeSingle();
     categoryId = otherCat?.id;
   }
 
-  // 2. Insert core expense
   const { data: expense, error: expError } = await supabase
     .from('expenses')
     .insert([{ 
@@ -90,23 +90,14 @@ export const addExpense = async (expenseData) => {
       date, 
       category_id: categoryId, 
       created_by: user.id,
-      split_type: 'equal' 
+      split_type: splitType 
     }])
     .select()
     .single();
 
-  if (expError) {
-    console.error('Error adding expense:', expError);
-    throw expError;
-  }
+  if (expError) throw expError;
 
-  // 3. Insert participants
-  // Note: To map string names back to user_ids, we need to lookup profiles.
-  // For this adapter, if we can't find the friend, we skip them (legacy limitation).
   if (splitWith && splitWith.length > 0) {
-    const splitAmount = amount / splitWith.length;
-    
-    // Get all profiles of friends
     const { data: friendsData } = await supabase
       .from('friendships')
       .select('requester:profiles!requester_id(id, full_name, display_name, email), addressee:profiles!addressee_id(id, full_name, display_name, email)')
@@ -123,22 +114,26 @@ export const addExpense = async (expenseData) => {
       const isMe = friendName === 'You';
       const friendId = isMe ? user.id : knownFriends[friendName.toLowerCase()];
       
-      if (!friendId) return null; // Can't add non-existent user in new strict schema
+      if (!friendId) return null;
+
+      let amount_owed = 0;
+      if (splitType === 'equal') {
+         amount_owed = amount / splitWith.length;
+      } else if (splitsData[friendName] !== undefined) {
+         amount_owed = splitsData[friendName];
+      }
 
       return {
         expense_id: expense.id,
         user_id: friendId,
-        amount_owed: splitAmount,
+        amount_owed,
         amount_paid: friendName === paidBy ? amount : 0
       };
     }).filter(Boolean);
 
     if (splits.length > 0) {
       const { error: splitError } = await supabase.from('expense_participants').insert(splits);
-      if (splitError) {
-        console.error('Error adding splits:', splitError);
-        throw splitError;
-      }
+      if (splitError) throw splitError;
     }
   }
 
@@ -146,19 +141,111 @@ export const addExpense = async (expenseData) => {
 };
 
 export const updateExpense = async (id, updates) => {
-  // Limited adapter: only updates title/amount/date
-  const { data, error } = await supabase
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("User not authenticated");
+
+  const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {} } = updates;
+
+  let categoryId = null;
+  const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).limit(1).maybeSingle();
+  if (catData) {
+    categoryId = catData.id;
+  } else {
+    const { data: otherCat } = await supabase.from('categories').select('id').eq('slug', 'other').maybeSingle();
+    categoryId = otherCat?.id;
+  }
+
+  const { data: expense, error: expError } = await supabase
     .from('expenses')
-    .update({ title: updates.title, amount: updates.amount, date: updates.date })
+    .update({ 
+      title, 
+      amount, 
+      date, 
+      category_id: categoryId,
+      split_type: splitType
+    })
     .eq('id', id)
     .select()
     .single();
 
-  if (error) {
-    console.error('Error updating expense:', error);
-    throw error;
+  if (expError) throw expError;
+
+  if (splitWith && splitWith.length > 0) {
+    await supabase.from('expense_participants').delete().eq('expense_id', id);
+
+    const { data: friendsData } = await supabase
+      .from('friendships')
+      .select('requester:profiles!requester_id(id, full_name, display_name, email), addressee:profiles!addressee_id(id, full_name, display_name, email)')
+      .eq('status', 'accepted')
+      .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+
+    const knownFriends = {};
+    friendsData?.forEach(f => {
+      const friendProfile = f.requester.id === user.id ? f.addressee : f.requester;
+      knownFriends[getProfileName(friendProfile).toLowerCase()] = friendProfile.id;
+    });
+
+    const splits = splitWith.map(friendName => {
+      const isMe = friendName === 'You';
+      const friendId = isMe ? user.id : knownFriends[friendName.toLowerCase()];
+      
+      if (!friendId) return null;
+
+      let amount_owed = 0;
+      if (splitType === 'equal') {
+         amount_owed = amount / splitWith.length;
+      } else if (splitsData[friendName] !== undefined) {
+         amount_owed = splitsData[friendName];
+      }
+
+      return {
+        expense_id: id,
+        user_id: friendId,
+        amount_owed,
+        amount_paid: friendName === paidBy ? amount : 0
+      };
+    }).filter(Boolean);
+
+    if (splits.length > 0) {
+      const { error: splitError } = await supabase.from('expense_participants').insert(splits);
+      if (splitError) throw splitError;
+    }
   }
-  return data;
+
+  return { ...expense, category, paidBy, splitWith };
+};
+
+export const getAggregatedBalances = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { youOwe: [], owesYou: [] };
+
+  const [balances, friendships] = await Promise.all([
+    supabase.from('user_balances').select('*').or(`debtor_id.eq.${user.id},creditor_id.eq.${user.id}`),
+    getFriendships()
+  ]);
+
+  if (balances.error) throw balances.error;
+
+  const friendsMap = {};
+  friendships.forEach(f => {
+    if (f.status === 'accepted') {
+       const p = f.requester_id === user.id ? f.addressee : f.requester;
+       friendsMap[p.id] = getProfileName(p);
+    }
+  });
+
+  const youOwe = [];
+  const owesYou = [];
+
+  balances.data.forEach(b => {
+    if (b.debtor_id === user.id) {
+       youOwe.push({ name: friendsMap[b.creditor_id] || 'Unknown', amount: b.net_balance });
+    } else if (b.creditor_id === user.id) {
+       owesYou.push({ name: friendsMap[b.debtor_id] || 'Unknown', amount: b.net_balance });
+    }
+  });
+
+  return { youOwe, owesYou };
 };
 
 export const deleteExpense = async (id) => {
@@ -257,7 +344,7 @@ export const getFriendsAndBalances = async () => {
   return accepted.map(f => {
     const friendProfile = f.requester_id === user?.id ? f.addressee : f.requester;
     return { 
-      name: friendProfile.display_name || friendProfile.full_name || friendProfile.email, 
+      name: getProfileName(friendProfile), 
       id: friendProfile.id 
     };
   });

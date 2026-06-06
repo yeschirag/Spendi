@@ -1,195 +1,423 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Save, User, Users } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const AddExpensePage = () => {
   const { friends, addExpense } = useAppContext();
   const navigate = useNavigate();
   
+  const [step, setStep] = useState(1);
+  
+  // Step 1: Basics
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [category, setCategory] = useState('food');
-  const [paidBy, setPaidBy] = useState('You');
+  
+  // Step 2: Participants
   const [splitWith, setSplitWith] = useState(['You']);
+  const [friendSearch, setFriendSearch] = useState('');
+  
+  // Step 3: Math
+  const [paidBy, setPaidBy] = useState('You');
+  const [splitType, setSplitType] = useState('equal');
+  const [splitsData, setSplitsData] = useState({});
+
+  useEffect(() => {
+    if (splitType === 'percentage') {
+      const equalPct = 100 / splitWith.length;
+      const initialSplits = {};
+      splitWith.forEach(f => initialSplits[f] = equalPct.toFixed(2));
+      setSplitsData(initialSplits);
+    } else if (splitType === 'exact') {
+      const equalAmt = (parseFloat(amount || 0) / splitWith.length).toFixed(2);
+      const initialSplits = {};
+      splitWith.forEach(f => initialSplits[f] = equalAmt);
+      setSplitsData(initialSplits);
+    }
+  }, [splitType, splitWith.length, amount]);
 
   const handleSplitWithChange = (friend) => {
-    setSplitWith((prev) => 
-      prev.includes(friend) 
+    setSplitWith((prev) => {
+      const next = prev.includes(friend) 
         ? prev.filter((f) => f !== friend) 
-        : [...prev, friend]
-    );
+        : [...prev, friend];
+      return next;
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSplitDataChange = (friend, value) => {
+    setSplitsData(prev => ({
+      ...prev,
+      [friend]: value
+    }));
+  };
+
+  const getSplitTotal = () => {
+    return splitWith.reduce((sum, f) => sum + parseFloat(splitsData[f] || 0), 0);
+  };
+
+  const isStep1Valid = title.trim().length > 0 && parseFloat(amount) > 0;
+  const isStep2Valid = splitWith.length > 0;
+  
+  const isValidForm = () => {
+    if (!isStep1Valid || !isStep2Valid) return false;
+    
+    if (splitType === 'percentage') {
+      return Math.abs(getSplitTotal() - 100) < 0.1;
+    } else if (splitType === 'exact') {
+      return Math.abs(getSplitTotal() - parseFloat(amount)) < 0.01;
+    }
+    return true;
+  };
+
+  const handleQuickSave = (e) => {
     e.preventDefault();
-    if (!title || !amount || splitWith.length === 0) return;
+    if (!isStep1Valid) return;
     
     addExpense({
       title,
       amount: parseFloat(amount),
       date,
       category,
+      paidBy: 'You',
+      splitWith: ['You'],
+      splitType: 'equal',
+      splitsData: {}
+    });
+    navigate('/dashboard');
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!isValidForm()) return;
+    
+    let finalSplitsData = {};
+    if (splitType === 'percentage') {
+      splitWith.forEach(f => {
+        finalSplitsData[f] = (parseFloat(amount) * (parseFloat(splitsData[f]) / 100)).toFixed(2);
+      });
+    } else if (splitType === 'exact') {
+      splitWith.forEach(f => {
+        finalSplitsData[f] = parseFloat(splitsData[f]).toFixed(2);
+      });
+    }
+
+    addExpense({
+      title,
+      amount: parseFloat(amount),
+      date,
+      category,
       paidBy,
-      splitWith
+      splitWith,
+      splitType: splitType === 'equal' ? 'equal' : 'exact',
+      splitsData: finalSplitsData
     });
     
     navigate('/dashboard');
   };
 
+  const slideVariants = {
+    hidden: { x: 50, opacity: 0 },
+    visible: { x: 0, opacity: 1 },
+    exit: { x: -50, opacity: 0 }
+  };
+
   return (
-    <div className="flex-1 p-6 md:p-16 max-w-7xl mx-auto w-full bg-transparent animate-fade-in flex flex-col pb-32 md:pb-16">
+    <div className="flex-1 p-6 md:p-16 max-w-3xl mx-auto w-full bg-transparent flex flex-col pb-32 md:pb-16 min-h-[100dvh]">
       
-      <div className="mb-12">
+      {/* Header */}
+      <div className="mb-8 flex items-center justify-between">
         <button 
-          onClick={() => navigate('/dashboard')}
+          onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}
           className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm uppercase tracking-widest font-medium"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <ArrowLeft size={16} />
-          Back to Dashboard
+          {step > 1 ? 'Back' : 'Cancel'}
         </button>
+
+        {/* Progress Dots */}
+        <div className="flex gap-2">
+          {[1, 2, 3].map(i => (
+            <div 
+              key={i} 
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${step === i ? 'bg-white w-6' : step > i ? 'bg-white/50' : 'bg-white/10'}`} 
+            />
+          ))}
+        </div>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-16 lg:gap-24 flex-1">
-        
-        {/* Left Column: Dynamic Receipt Summary */}
-        <div className="w-full lg:w-1/3 flex flex-col relative">
-          <div className="sticky top-32">
-            <h1 className="text-6xl md:text-7xl text-white font-normal tracking-tight mb-8" style={{ fontFamily: "'Instrument Serif', serif" }}>
-              Log Expense.
-            </h1>
-            
-            <div className="bg-[#0A0A0A] border border-white/10 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
-              
-              <div className="relative z-10 flex flex-col gap-6" style={{ fontFamily: "'Inter', sans-serif" }}>
-                <div className="border-b border-white/10 pb-6">
-                  <p className="text-white/40 text-xs uppercase tracking-widest mb-2 font-medium">Amount</p>
-                  <p className="text-5xl text-white tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
-                    ₹{amount ? parseFloat(amount).toFixed(2) : '0.00'}
-                  </p>
-                </div>
-                
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-white/40 font-light">Title</span>
-                  <span className="text-white truncate max-w-[150px]">{title || '—'}</span>
-                </div>
-                
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-white/40 font-light">Category</span>
-                  <span className="text-white capitalize">{category}</span>
+      <div className="flex-1 flex flex-col justify-center">
+        <AnimatePresence mode="wait">
+          {/* STEP 1: BASICS */}
+          {step === 1 && (
+            <motion.div 
+              key="step1"
+              variants={slideVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-8 w-full"
+            >
+              <div>
+                <h1 className="text-5xl md:text-7xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  The Basics.
+                </h1>
+                <p className="text-white/50 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  What did you pay for, and how much was it?
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                <div className="group">
+                  <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-3 transition-colors group-focus-within:text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>What was this for?</label>
+                  <input 
+                    type="text" 
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., Dinner at the space station"
+                    className="w-full bg-transparent border-b border-white/20 pb-4 text-3xl text-white placeholder-white/20 focus:outline-none focus:border-white transition-colors"
+                    style={{ fontFamily: "'Instrument Serif', serif" }}
+                    autoFocus
+                  />
                 </div>
 
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-white/40 font-light">Date</span>
-                  <span className="text-white">{date}</span>
-                </div>
-
-                <div className="border-t border-white/10 pt-6 mt-2">
-                  <p className="text-white/40 text-xs uppercase tracking-widest mb-4 font-medium">Split Details</p>
-                  <div className="flex justify-between items-center text-sm mb-2">
-                    <span className="text-white/40 font-light">Paid By</span>
-                    <span className="text-white">{paidBy}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-white/40 font-light">Split With</span>
-                    <div className="flex flex-col items-end gap-1">
-                      {splitWith.length === 0 ? (
-                        <span className="text-white/20 italic">None</span>
-                      ) : (
-                        splitWith.map(person => (
-                          <span key={person} className="text-white">{person}</span>
-                        ))
-                      )}
-                    </div>
+                <div className="group mt-4">
+                  <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-3 transition-colors group-focus-within:text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>Amount</label>
+                  <div className="relative">
+                    <span className="absolute left-0 top-0 bottom-4 flex items-center text-3xl text-white/50 font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>₹</span>
+                    <input 
+                      type="number" 
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      placeholder="0.00"
+                      step="0.01"
+                      min="0"
+                      className="w-full bg-transparent border-b border-white/20 pb-4 pl-8 text-3xl text-white placeholder-white/20 focus:outline-none focus:border-white transition-colors"
+                      style={{ fontFamily: "'Instrument Serif', serif" }}
+                    />
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        {/* Right Column: Form Fields */}
-        <div className="flex-1 w-full">
-          <form onSubmit={handleSubmit} className="flex flex-col gap-8" style={{ fontFamily: "'Inter', sans-serif" }}>
-            
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-8">
-              <div className="flex flex-col gap-3">
-                <label htmlFor="expenseTitle" className="text-sm font-light text-white/50 tracking-wide uppercase">Title</label>
-                <input type="text" id="expenseTitle" placeholder="e.g., Dinner at the Ritz" required value={title} onChange={(e) => setTitle(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white transition-colors text-lg" />
-              </div>
 
-              <div className="flex flex-col gap-3">
-                <label htmlFor="expenseAmount" className="text-sm font-light text-white/50 tracking-wide uppercase">Amount (₹)</label>
-                <input type="number" id="expenseAmount" placeholder="0.00" step="0.01" min="0" required value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white placeholder:text-white/20 focus:outline-none focus:border-white transition-colors text-3xl font-medium" />
-              </div>
+                <div className="grid grid-cols-2 gap-8 mt-4">
+                  <div className="group">
+                    <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-3 transition-colors group-focus-within:text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>Date</label>
+                    <input 
+                      type="date" 
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full bg-transparent border-b border-white/20 pb-4 text-xl text-white focus:outline-none focus:border-white transition-colors cursor-pointer"
+                      style={{ fontFamily: "'Inter', sans-serif", colorScheme: "dark" }}
+                    />
+                  </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="flex flex-col gap-3">
-                  <label htmlFor="expenseDate" className="text-sm font-light text-white/50 tracking-wide uppercase">Date</label>
-                  <input type="date" id="expenseDate" value={date} onChange={(e) => setDate(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-white transition-colors [color-scheme:dark] text-base" />
+                  <div className="group">
+                    <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-3 transition-colors group-focus-within:text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>Category</label>
+                    <select 
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full bg-transparent border-b border-white/20 pb-4 text-xl text-white focus:outline-none focus:border-white transition-colors appearance-none cursor-pointer"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      <option value="food" className="bg-black text-white">Food & Drinks</option>
+                      <option value="transport" className="bg-black text-white">Transport</option>
+                      <option value="shopping" className="bg-black text-white">Shopping</option>
+                      <option value="entertainment" className="bg-black text-white">Entertainment</option>
+                      <option value="bills" className="bg-black text-white">Bills & Utilities</option>
+                      <option value="other" className="bg-black text-white">Other</option>
+                    </select>
+                  </div>
                 </div>
-                
-                <div className="flex flex-col gap-3">
-                  <label htmlFor="expenseCategory" className="text-sm font-light text-white/50 tracking-wide uppercase">Category</label>
-                  <select id="expenseCategory" value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-white transition-colors text-base">
-                    <option value="food">Food & Drinks</option>
-                    <option value="transport">Transport</option>
-                    <option value="shopping">Shopping</option>
-                    <option value="entertainment">Entertainment</option>
-                    <option value="bills">Bills & Utilities</option>
-                    <option value="other">Other</option>
+              </div>
+
+              <div className="mt-12 flex flex-col sm:flex-row gap-4 items-center justify-end">
+                <button 
+                  type="button"
+                  onClick={() => setStep(2)}
+                  disabled={!isStep1Valid}
+                  className="w-full sm:w-auto bg-white text-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  Next: Split <ArrowRight size={16} />
+                </button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* STEP 2: PARTICIPANTS */}
+          {step === 2 && (
+            <motion.div 
+              key="step2"
+              variants={slideVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-8 w-full"
+            >
+              <div>
+                <h1 className="text-5xl md:text-7xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  Who's involved?
+                </h1>
+                <p className="text-white/50 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  Select the friends you want to split this with.
+                </p>
+              </div>
+
+              <div className="group mt-4 flex-1 flex flex-col min-h-0">
+                <div className="relative mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                  <input 
+                    type="text" 
+                    value={friendSearch}
+                    onChange={(e) => setFriendSearch(e.target.value)}
+                    placeholder="Search friends..." 
+                    className="w-full bg-white/5 border border-white/10 rounded-full py-3 pl-12 pr-4 text-white placeholder-white/30 focus:outline-none focus:border-white/30 transition-colors text-sm"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  />
+                </div>
+                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+                  <div className="flex flex-col gap-3">
+                    {['You', ...friends].filter(f => f.toLowerCase().includes(friendSearch.toLowerCase())).map(person => {
+                      const isSelected = splitWith.includes(person);
+                      return (
+                        <label key={person} className={`flex items-center gap-4 p-5 rounded-2xl border transition-all cursor-pointer ${isSelected ? 'bg-white/10 border-white/20' : 'bg-transparent border-white/5 hover:border-white/10'}`}>
+                          <div className={`w-6 h-6 shrink-0 rounded-md flex items-center justify-center border transition-colors ${isSelected ? 'bg-white border-white text-black' : 'bg-transparent border-white/30 text-transparent'}`}>
+                            <svg viewBox="0 0 14 14" fill="none" className="w-4 h-4" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="2.5 7 5.5 10 11.5 3"></polyline></svg>
+                          </div>
+                          <input type="checkbox" value={person} checked={isSelected} onChange={() => handleSplitWithChange(person)} className="sr-only" />
+                          <span className={`text-lg font-medium transition-colors ${isSelected ? 'text-white' : 'text-white/50'}`}>{person}</span>
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 flex justify-end">
+                {splitWith.length === 1 && splitWith.includes('You') ? (
+                  <button 
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={!isStep2Valid}
+                    className="w-full sm:w-auto bg-white text-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    <Save size={16} /> Save Expense
+                  </button>
+                ) : (
+                  <button 
+                    type="button"
+                    onClick={() => setStep(3)}
+                    disabled={!isStep2Valid}
+                    className="w-full sm:w-auto bg-white text-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    Next: The Math <ArrowRight size={16} />
+                  </button>
+                )}
+              </div>
+            </motion.div>
+          )}
+
+          {/* STEP 3: THE MATH */}
+          {step === 3 && (
+            <motion.div 
+              key="step3"
+              variants={slideVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              transition={{ duration: 0.3 }}
+              className="flex flex-col gap-8 w-full"
+            >
+              <div>
+                <h1 className="text-5xl md:text-7xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
+                  The Math.
+                </h1>
+                <p className="text-white/50 text-lg font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  How do you want to divide ₹{parseFloat(amount).toFixed(2)}?
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-8">
+                <div className="group">
+                  <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-3 transition-colors group-focus-within:text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>Who Paid?</label>
+                  <select 
+                    value={paidBy}
+                    onChange={(e) => setPaidBy(e.target.value)}
+                    className="w-full bg-transparent border-b border-white/20 pb-4 text-2xl text-white focus:outline-none focus:border-white transition-colors appearance-none cursor-pointer"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    <option value="You" className="bg-black text-white">You</option>
+                    {friends.map(friend => <option key={friend} value={friend} className="bg-black text-white">{friend}</option>)}
                   </select>
                 </div>
-              </div>
-            </div>
 
-            <div className="bg-white/5 border border-white/10 rounded-3xl p-8 space-y-8">
-              <h3 className="text-2xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>Payment Details</h3>
-              
-              <div className="flex flex-col gap-3">
-                <label htmlFor="expensePaidBy" className="text-sm font-light text-white/50 tracking-wide uppercase">Who Paid?</label>
-                <select id="expensePaidBy" value={paidBy} onChange={(e) => setPaidBy(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-6 py-4 text-white focus:outline-none focus:border-white transition-colors text-base">
-                  <option value="You">You</option>
-                  {friends.map(friend => <option key={friend} value={friend}>{friend}</option>)}
-                </select>
-              </div>
+                <div className="flex flex-col gap-4 pt-4 border-t border-white/5">
+                  <label className="text-xs font-medium text-white/40 uppercase tracking-widest mb-1 transition-colors group-focus-within:text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>Split Method</label>
+                  <div className="flex gap-4 p-2 rounded-2xl border bg-black/50 border-white/5">
+                    <button type="button" onClick={() => setSplitType('equal')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'equal' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>Equal</button>
+                    <button type="button" onClick={() => setSplitType('percentage')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'percentage' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>Percentage</button>
+                    <button type="button" onClick={() => setSplitType('exact')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'exact' ? 'bg-white text-black' : 'text-white/50 hover:text-white'}`}>Exact</button>
+                  </div>
+                </div>
 
-              <div className="flex flex-col gap-4 border-t border-white/5 pt-6">
-                <label className="text-sm font-light text-white/50 tracking-wide uppercase">Split With</label>
-                <div className="flex flex-wrap gap-4">
-                  <label className="flex items-center gap-3 cursor-pointer group bg-white/5 px-5 py-3 rounded-xl border border-white/5 hover:border-white/20 transition-all">
-                    <div className={`w-5 h-5 rounded-sm flex items-center justify-center border transition-colors ${splitWith.includes('You') ? 'bg-white border-white text-black' : 'bg-transparent border-white/30 text-transparent'}`}>
-                      <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="2.5 7 5.5 10 11.5 3"></polyline></svg>
+                <div className="flex flex-col gap-3">
+                  {splitWith.map(person => (
+                    <div key={person} className="flex items-center justify-between gap-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                      <span className="text-lg font-medium text-white">{person}</span>
+                      
+                      {splitType !== 'equal' && (
+                        <div className="flex items-center gap-2">
+                          <input 
+                            type="number" 
+                            step="0.01"
+                            min="0"
+                            value={splitsData[person] || ''} 
+                            onChange={(e) => handleSplitDataChange(person, e.target.value)}
+                            className="w-28 bg-black border border-white/20 rounded-lg px-4 py-3 text-right text-white focus:outline-none focus:border-white transition-colors"
+                            placeholder="0.00"
+                          />
+                          <span className="text-white/50 font-medium">{splitType === 'percentage' ? '%' : '₹'}</span>
+                        </div>
+                      )}
+                      {splitType === 'equal' && amount && (
+                        <span className="text-xl text-white font-medium">₹{(amount / splitWith.length).toFixed(2)}</span>
+                      )}
                     </div>
-                    <input type="checkbox" value="You" checked={splitWith.includes('You')} onChange={() => handleSplitWithChange('You')} className="sr-only" />
-                    <span className="text-base text-white/80 group-hover:text-white transition-colors">You</span>
-                  </label>
-                  
-                  {friends.map(friend => (
-                    <label key={friend} className="flex items-center gap-3 cursor-pointer group bg-white/5 px-5 py-3 rounded-xl border border-white/5 hover:border-white/20 transition-all">
-                      <div className={`w-5 h-5 rounded-sm flex items-center justify-center border transition-colors ${splitWith.includes(friend) ? 'bg-white border-white text-black' : 'bg-transparent border-white/30 text-transparent'}`}>
-                        <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="2.5 7 5.5 10 11.5 3"></polyline></svg>
-                      </div>
-                      <input type="checkbox" value={friend} checked={splitWith.includes(friend)} onChange={() => handleSplitWithChange(friend)} className="sr-only" />
-                      <span className="text-base text-white/80 group-hover:text-white transition-colors">{friend}</span>
-                    </label>
                   ))}
                 </div>
+
+                {splitType !== 'equal' && splitWith.length > 0 && (
+                  <div className={`mt-2 text-sm font-medium p-4 rounded-xl border ${isValidForm() ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+                    {splitType === 'percentage' 
+                      ? `Total: ${getSplitTotal().toFixed(2)}% ${!isValidForm() ? '(Must equal 100%)' : '✓'}`
+                      : `Total: ₹${getSplitTotal().toFixed(2)} / ₹${amount || '0.00'} ${!isValidForm() ? '(Must match total)' : '✓'}`
+                    }
+                  </div>
+                )}
               </div>
-            </div>
 
-            <div className="mt-4">
-              <button type="submit" disabled={splitWith.length === 0 || !title || !amount} className="w-full py-5 rounded-2xl text-lg font-medium bg-white text-black hover:bg-white/90 transition-all shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed">
-                Save Expense
-              </button>
-            </div>
-            
-          </form>
-        </div>
-
+              <div className="mt-8 flex justify-end">
+                <button 
+                  type="button"
+                  onClick={handleSubmit}
+                  disabled={!isValidForm()}
+                  className="w-full sm:w-auto bg-white text-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center gap-2"
+                  style={{ fontFamily: "'Inter', sans-serif" }}
+                >
+                  <Save size={16} />
+                  Save Expense
+                </button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

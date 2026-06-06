@@ -10,6 +10,8 @@ export const AuthPage = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   
@@ -21,7 +23,7 @@ export const AuthPage = () => {
     try {
       const { error: authError } = isLogin 
         ? await login(email, password)
-        : await signUp(email, password);
+        : await signUp(email, password, fullName, phone);
         
       if (authError) throw authError;
       
@@ -93,6 +95,23 @@ export const AuthPage = () => {
           </div>
 
           <form className="space-y-6 relative z-10" onSubmit={handleSubmit} style={{ fontFamily: "'Inter', sans-serif" }}>
+            {!isLogin && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-white/70">Full Name</label>
+                  <div className="mt-2">
+                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white focus:border-white sm:text-sm transition-all" placeholder="John Doe" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-white/70">Phone Number (Optional)</label>
+                  <div className="mt-2">
+                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white focus:border-white sm:text-sm transition-all" placeholder="+91 9876543210" />
+                  </div>
+                </div>
+              </>
+            )}
+            
             <div>
               <label className="block text-sm font-medium text-white/70">Email address</label>
               <div className="mt-2">

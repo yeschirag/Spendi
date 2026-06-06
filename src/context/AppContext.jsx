@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuth } from './AuthContext';
 import { supabase } from '../lib/supabase';
 import * as db from '../services/db';
@@ -18,137 +18,74 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState('dark');
   const [loadingData, setLoadingData] = useState(true);
 
-  // Fetch data when user logs in
+  const loadData = useCallback(async () => {
+    try {
+      const [expensesData, friendsData, aggregatedBalances] = await Promise.all([
+        db.getExpenses(),
+        db.getFriendsAndBalances(),
+        db.getAggregatedBalances()
+      ]);
+      setExpenses(expensesData || []);
+      
+      const friendsList = (friendsData || []).map(f => f.name);
+      setFriends(friendsList);
+      
+      setBalances(aggregatedBalances || { youOwe: [], owesYou: [] });
+    } catch (err) {
+      console.error("Error fetching data:", err);
+    }
+  }, []);
+
   useEffect(() => {
     if (user) {
       setLoadingData(true);
-      Promise.all([
-        db.getExpenses(),
-        db.getFriendsAndBalances()
-      ]).then(([expensesData, friendsData]) => {
-        setExpenses(expensesData || []);
-        
-        const friendsList = (friendsData || []).map(f => f.name);
-        setFriends(friendsList);
-        
-        // Recalculate balances based on fetched expenses
-        let initialBalances = {};
-        friendsList.forEach(f => initialBalances[f] = 0);
-        
-        if (expensesData) {
-          expensesData.forEach(exp => {
-            initialBalances = calculateBalances(exp, initialBalances);
-          });
-        }
-        setBalances(initialBalances);
-      }).catch(err => {
-        console.error("Error fetching data:", err);
-      }).finally(() => {
-        setLoadingData(false);
-      });
+      loadData().finally(() => setLoadingData(false));
     } else {
       setFriends([]);
       setExpenses([]);
       setBalances({});
       setLoadingData(false);
     }
-  }, [user]);
+  }, [user, loadData]);
 
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
 
   const addFriend = async (name) => {
-    if (friends.includes(name) || name.toLowerCase() === 'you') return false;
-    
-    if (user) {
-      try {
-        const { error } = await supabase.from('friends').insert([{ name, user_id: user.id }]);
-        if (error) throw error;
-      } catch (err) {
-        console.error("Failed to add friend to db", err);
-        return false;
-      }
-    }
-    
-    setFriends([...friends, name]);
-    setBalances({ ...balances, [name]: 0 });
-    return true;
-  };
-
-  const calculateBalances = (expense, currentBalances) => {
-    const newBalances = { ...currentBalances };
-    const splitAmount = expense.amount / expense.splitWith.length;
-
-    expense.splitWith.forEach((person) => {
-      if (person !== expense.paidBy) {
-        if (expense.paidBy === "You") {
-          newBalances[person] = (newBalances[person] || 0) + splitAmount;
-        } else if (person === "You") {
-          newBalances[expense.paidBy] = (newBalances[expense.paidBy] || 0) - splitAmount;
-        }
-      }
-    });
-
-    if (expense.paidBy !== "You" && expense.splitWith.includes("You")) {
-      newBalances[expense.paidBy] = (newBalances[expense.paidBy] || 0) - splitAmount;
-    }
-    
-    return newBalances;
+    // Deprecated for Phase 1/2. Handled by FriendContext.
+    console.warn("Legacy addFriend called");
+    return false;
   };
 
   const addExpense = async (expenseData) => {
-    const newExpense = {
-      user_id: user ? user.id : null,
-      ...expenseData,
-    };
-    
-    if (user) {
-      try {
-        const data = await db.addExpense(newExpense);
-        newExpense.id = data.id;
-      } catch (err) {
-        console.error("Failed to save expense", err);
-        return;
-      }
-    } else {
-      newExpense.id = Date.now().toString();
+    if (!user) return;
+    try {
+      await db.addExpense(expenseData);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to save expense", err);
     }
-    
-    setBalances(prev => calculateBalances(newExpense, prev));
-    setExpenses(prev => [newExpense, ...prev]);
   };
 
   const editExpense = async (id, updates) => {
-    if (user) {
-      try {
-        const { updateExpense } = await import('../services/db');
-        await updateExpense(id, updates);
-      } catch (err) {
-        console.error("Failed to update expense", err);
-        return;
-      }
+    if (!user) return;
+    try {
+      await db.updateExpense(id, updates);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to update expense", err);
     }
-    
-    setExpenses(prev => prev.map(exp => 
-      exp.id === id ? { ...exp, ...updates } : exp
-    ));
-    // Note: Balances recalculation is complex for edits, requires full reload or deep state diffing. 
-    // For MVP, we just update the expense list.
   };
 
   const removeExpense = async (id) => {
-    if (user) {
-      try {
-        const { deleteExpense } = await import('../services/db');
-        await deleteExpense(id);
-      } catch (err) {
-        console.error("Failed to delete expense", err);
-        return;
-      }
+    if (!user) return;
+    try {
+      await db.deleteExpense(id);
+      await loadData();
+    } catch (err) {
+      console.error("Failed to delete expense", err);
     }
-    
-    setExpenses(prev => prev.filter(exp => exp.id !== id));
   };
 
   const value = {

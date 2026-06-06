@@ -14,6 +14,7 @@ import { AuthPage } from './pages/AuthPage';
 import { AddExpensePage } from './pages/AddExpensePage';
 import { EditExpensePage } from './pages/EditExpensePage';
 import { FriendsPage } from './pages/FriendsPage';
+import { FriendDetailsPage } from './pages/FriendDetailsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { HistoryPage } from './pages/HistoryPage';
 import { SmoothScroll } from './components/layout/SmoothScroll';
@@ -21,6 +22,8 @@ import { useAuth } from './context/AuthContext';
 import { useAppContext } from './context/AppContext';
 import { Navigate } from 'react-router-dom';
 import './index.css';
+
+import { AppTour } from './components/shared/AppTour';
 
 function MainLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -41,7 +44,8 @@ function MainLayout({ children }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/[0.03] via-black to-black text-white font-body selection:bg-white/20">
+    <div className="flex min-h-screen bg-black bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-white/[0.03] via-black to-black text-white font-body selection:bg-white/20 relative">
+      <AppTour />
       <div className="hidden md:block">
         <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       </div>
@@ -80,6 +84,7 @@ function App() {
                 <Route path="/add-expense" element={<ProtectedRoute><MainLayout><AddExpensePage /></MainLayout></ProtectedRoute>} />
                 <Route path="/edit-expense/:id" element={<ProtectedRoute><MainLayout><EditExpensePage /></MainLayout></ProtectedRoute>} />
                 <Route path="/friends" element={<ProtectedRoute><MainLayout><FriendsPage /></MainLayout></ProtectedRoute>} />
+                <Route path="/friend/:id" element={<ProtectedRoute><MainLayout><FriendDetailsPage /></MainLayout></ProtectedRoute>} />
                 <Route path="/history" element={<ProtectedRoute><MainLayout><HistoryPage /></MainLayout></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />
               </Routes>

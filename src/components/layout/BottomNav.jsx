@@ -28,7 +28,7 @@ export const BottomNav = () => {
         <NavLink 
           to="/friends" 
           className={({ isActive }) => 
-            `flex flex-col items-center justify-center w-12 transition-colors ${isActive ? 'text-white' : 'text-white/40 hover:text-white/70'}`
+            `tour-network flex flex-col items-center justify-center w-12 transition-colors ${isActive ? 'text-white' : 'text-white/40 hover:text-white/70'}`
           }
         >
           <Users size={22} strokeWidth={2} />
@@ -37,7 +37,7 @@ export const BottomNav = () => {
         {/* Add Expense */}
         <button
           onClick={() => navigate('/add-expense')}
-          className="flex items-center justify-center w-12 h-12 bg-white text-black rounded-full hover:scale-105 transition-transform shadow-lg"
+          className="tour-add-expense flex items-center justify-center w-12 h-12 bg-white text-black rounded-full hover:scale-105 transition-transform shadow-lg"
         >
           <Plus size={24} strokeWidth={2.5} />
         </button>

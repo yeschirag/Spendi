@@ -33,6 +33,7 @@ $$ LANGUAGE plpgsql;
 CREATE TABLE public.profiles (
     id            UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email         TEXT NOT NULL UNIQUE,
+    username      TEXT UNIQUE,
     full_name     TEXT,
     display_name  TEXT,
     avatar_url    TEXT,
@@ -51,12 +52,14 @@ CREATE TRIGGER profiles_updated_at
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
-    INSERT INTO public.profiles (id, email, full_name, avatar_url)
+    INSERT INTO public.profiles (id, email, full_name, avatar_url, username, phone)
     VALUES (
         NEW.id,
         NEW.email,
         NEW.raw_user_meta_data->>'full_name',
-        NEW.raw_user_meta_data->>'avatar_url'
+        NEW.raw_user_meta_data->>'avatar_url',
+        split_part(NEW.email, '@', 1) || '_' || substr(md5(random()::text), 1, 4),
+        NEW.raw_user_meta_data->>'phone'
     );
     RETURN NEW;
 END;
@@ -380,7 +383,10 @@ ALTER TABLE public.expense_participants ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view relevant participants"
     ON public.expense_participants FOR SELECT
     TO authenticated
-    USING (user_id = auth.uid() OR public.is_expense_creator(expense_id));
+    USING (
+        public.is_expense_creator(expense_id) 
+        OR public.is_expense_participant(expense_id)
+    );
 
 CREATE POLICY "Expense creators manage participants"
     ON public.expense_participants FOR INSERT
@@ -430,7 +436,7 @@ CREATE POLICY "Users can update own notifications"
 -- Migration 010: Database Views
 -- ============================================================
 
-CREATE OR REPLACE VIEW public.user_balances AS
+CREATE OR REPLACE VIEW public.user_balances WITH (security_invoker = on) AS
 WITH expense_debts AS (
     SELECT
         ep_debtor.user_id AS debtor_id,
@@ -553,6 +559,7 @@ CREATE OR REPLACE FUNCTION public.search_users(search_term TEXT)
 RETURNS TABLE (
     id UUID,
     email TEXT,
+    username TEXT,
     full_name TEXT,
     display_name TEXT,
     avatar_url TEXT
@@ -566,6 +573,7 @@ BEGIN
     SELECT 
         p.id, 
         p.email, 
+        p.username,
         p.full_name, 
         p.display_name, 
         p.avatar_url
@@ -574,10 +582,14 @@ BEGIN
         p.id != auth.uid() -- Exclude the current user
         AND p.is_active = true
         AND (
-            p.email ILIKE '%' || search_term || '%'
+            p.username ILIKE search_term || '%'
+            OR p.email ILIKE '%' || search_term || '%'
             OR p.full_name ILIKE '%' || search_term || '%'
             OR p.display_name ILIKE '%' || search_term || '%'
         )
     LIMIT 10;
 END;
 $$;
+
+
+GRANT SELECT ON public.user_balances TO authenticated;

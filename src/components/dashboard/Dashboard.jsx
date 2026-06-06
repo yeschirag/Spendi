@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { StatCard } from './StatCard';
 import { useAppContext } from '../../context/AppContext';
 import { Wallet, TrendingDown, TrendingUp, Users, User, ArrowRight, Plus, Receipt } from 'lucide-react';
+import { CategoryIcon } from '../../utils/icons';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import { Doughnut, Bar } from 'react-chartjs-2';
 import { useNavigate } from 'react-router-dom';
@@ -43,16 +44,11 @@ export const Dashboard = () => {
     })
     .reduce((total, expense) => total + expense.amount, 0);
 
-  let youOwe = 0;
-  let othersOwe = 0;
+  const youOweList = balances?.youOwe || [];
+  const owesYouList = balances?.owesYou || [];
 
-  Object.values(balances).forEach((balance) => {
-    if (balance > 0) {
-      othersOwe += balance;
-    } else if (balance < 0) {
-      youOwe += Math.abs(balance);
-    }
-  });
+  const youOwe = youOweList.reduce((sum, item) => sum + item.amount, 0);
+  const othersOwe = owesYouList.reduce((sum, item) => sum + item.amount, 0);
 
   // Chart Data Preparation
   const expensesByCategory = expenses.reduce((acc, exp) => {
@@ -155,7 +151,7 @@ export const Dashboard = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
+      <div className="tour-balances grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
         <StatCard
           color="blue"
           title="Personal Expenses"
@@ -226,20 +222,30 @@ export const Dashboard = () => {
                   <p className="text-white/40 mb-6 text-sm font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>No friends added yet. Track your shared expenses.</p>
                   <button className="border-b border-white/30 hover:border-white text-white/80 hover:text-white pb-1 text-sm transition-colors" onClick={() => navigate('/friends')}>Add a friend</button>
                 </div>
+              ) : youOweList.length === 0 && owesYouList.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="text-white/40 mb-6 text-sm font-light tracking-wide" style={{ fontFamily: "'Inter', sans-serif" }}>All settled up with your friends.</p>
+                  <button className="border-b border-white/30 hover:border-white text-white/80 hover:text-white pb-1 text-sm transition-colors" onClick={() => navigate('/add-expense')}>Log an expense</button>
+                </div>
               ) : (
-                Object.entries(balances)
-                  .filter(([_, balance]) => balance !== 0)
-                  .map(([friend, balance]) => (
-                    <div key={friend} className="flex items-center justify-between py-4 border-b border-white/10 group cursor-pointer" onClick={() => navigate('/friends')}>
-                      <span className="font-light text-white/80 group-hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        {balance > 0 ? `${friend} owes you` : `You owe ${friend}`}
+                <>
+                  {owesYouList.map((item) => (
+                    <div key={`owes-${item.name}`} className="flex items-center justify-between py-4 border-b border-white/10 group cursor-pointer" onClick={() => navigate('/friends')}>
+                      <span className="font-light text-green-400/80 group-hover:text-green-400 transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {item.name} owes you
                       </span>
-                      <span className="text-2xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{Math.abs(balance).toFixed(2)}</span>
+                      <span className="text-2xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{item.amount.toFixed(2)}</span>
                     </div>
-                  ))
-              )}
-              {friends.length > 0 && Object.values(balances).every(b => b === 0) && (
-                <p className="text-left py-6 text-white/40 text-sm font-light italic" style={{ fontFamily: "'Inter', sans-serif" }}>All settled up.</p>
+                  ))}
+                  {youOweList.map((item) => (
+                    <div key={`owe-${item.name}`} className="flex items-center justify-between py-4 border-b border-white/10 group cursor-pointer" onClick={() => navigate('/friends')}>
+                      <span className="font-light text-red-400/80 group-hover:text-red-400 transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        You owe {item.name}
+                      </span>
+                      <span className="text-2xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{item.amount.toFixed(2)}</span>
+                    </div>
+                  ))}
+                </>
               )}
             </div>
           </div>
@@ -263,7 +269,7 @@ export const Dashboard = () => {
                     <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 mb-3 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer shadow-lg w-full max-w-full overflow-hidden">
                       <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0 md:pr-8 w-full">
                         <div className="hidden sm:flex w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-xl bg-gradient-to-br from-white/10 to-white/5 items-center justify-center border border-white/10 shadow-inner">
-                          <span className="text-xl md:text-2xl text-white/80 font-medium font-serif">{expense.category.charAt(0).toUpperCase()}</span>
+                          <CategoryIcon slug={expense.category} className="text-white/80 w-5 h-5 md:w-6 md:h-6" />
                         </div>
                         <div className="flex-1 min-w-0 w-full">
                           <h4 className="text-lg md:text-xl text-white font-medium mb-1 tracking-tight truncate w-full" style={{ fontFamily: "'Inter', sans-serif" }}>{expense.title}</h4>

@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Receipt, Search, SlidersHorizontal } from 'lucide-react';
+import { CategoryIcon } from '../utils/icons';
 
 export const HistoryPage = () => {
   const { expenses } = useAppContext();
@@ -136,7 +137,7 @@ export const HistoryPage = () => {
               <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 mb-4 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer shadow-lg w-full max-w-full overflow-hidden">
                 <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0 md:pr-8 w-full">
                   <div className="hidden sm:flex w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 items-center justify-center border border-white/10 shadow-inner">
-                    <span className="text-2xl md:text-3xl text-white/80 font-medium font-serif">{expense.category.charAt(0).toUpperCase()}</span>
+                    <CategoryIcon slug={expense.category} className="text-white/80 w-6 h-6 md:w-8 md:h-8" />
                   </div>
                   <div className="flex-1 min-w-0 w-full">
                     <h4 className="text-xl md:text-2xl text-white font-normal mb-1 md:mb-2 tracking-tight truncate w-full" style={{ fontFamily: "'Instrument Serif', serif" }}>{expense.title}</h4>
