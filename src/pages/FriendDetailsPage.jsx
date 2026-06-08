@@ -44,7 +44,7 @@ export const FriendDetailsPage = () => {
     <div className="flex-1 p-6 md:p-16 max-w-5xl mx-auto w-full bg-transparent min-h-[100dvh] pb-32 animate-fade-in">
       <button 
         onClick={() => navigate('/friends')}
-        className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12 text-sm uppercase tracking-widest font-medium w-fit"
+        className="hidden md:flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12 text-sm uppercase tracking-widest font-medium w-fit"
         style={{ fontFamily: "'Inter', sans-serif" }}
       >
         <ArrowLeft size={16} />

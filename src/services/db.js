@@ -111,6 +111,13 @@ export const addExpense = async (expenseData) => {
       knownFriends[getProfileName(friendProfile).toLowerCase()] = friendProfile.id;
     });
 
+    if (groupId) {
+      const { data: groupMembers } = await supabase.from('group_members').select('user_id, profiles(id, full_name, display_name, email)').eq('group_id', groupId);
+      groupMembers?.forEach(gm => {
+        knownFriends[getProfileName(gm.profiles).toLowerCase()] = gm.user_id;
+      });
+    }
+
     const splits = splitWith.map(friendName => {
       const isMe = friendName === 'You';
       const friendId = isMe ? user.id : knownFriends[friendName.toLowerCase()];
@@ -119,9 +126,9 @@ export const addExpense = async (expenseData) => {
 
       let amount_owed = 0;
       if (splitType === 'equal') {
-         amount_owed = amount / splitWith.length;
+         amount_owed = Number((amount / splitWith.length).toFixed(2));
       } else if (splitsData[friendName] !== undefined) {
-         amount_owed = splitsData[friendName];
+         amount_owed = Number(splitsData[friendName]);
       }
 
       return {
@@ -187,6 +194,13 @@ export const updateExpense = async (id, updates) => {
       knownFriends[getProfileName(friendProfile).toLowerCase()] = friendProfile.id;
     });
 
+    if (groupId) {
+      const { data: groupMembers } = await supabase.from('group_members').select('user_id, profiles(id, full_name, display_name, email)').eq('group_id', groupId);
+      groupMembers?.forEach(gm => {
+        knownFriends[getProfileName(gm.profiles).toLowerCase()] = gm.user_id;
+      });
+    }
+
     const splits = splitWith.map(friendName => {
       const isMe = friendName === 'You';
       const friendId = isMe ? user.id : knownFriends[friendName.toLowerCase()];
@@ -195,9 +209,9 @@ export const updateExpense = async (id, updates) => {
 
       let amount_owed = 0;
       if (splitType === 'equal') {
-         amount_owed = amount / splitWith.length;
+         amount_owed = Number((amount / splitWith.length).toFixed(2));
       } else if (splitsData[friendName] !== undefined) {
-         amount_owed = splitsData[friendName];
+         amount_owed = Number(splitsData[friendName]);
       }
 
       return {
@@ -403,12 +417,13 @@ export const getGroups = async () => {
     .from('groups')
     .select(`
       *,
-      group_members!inner(user_id, role)
+      group_members(user_id, role, profiles(id, full_name, display_name, email, avatar_url))
     `)
-    .eq('group_members.user_id', user.id)
     .order('created_at', { ascending: false });
     
   if (error) throw error;
+  
+  // Filter locally if needed or just return (since RLS already filters groups the user is in)
   return data;
 };
 

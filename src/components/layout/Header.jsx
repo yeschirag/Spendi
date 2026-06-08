@@ -2,8 +2,12 @@ import React from 'react';
 import { Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
+import { useAuth } from '../../context/AuthContext';
+
 export const Header = ({ onToggleMenu }) => {
   const navigate = useNavigate();
+  const { profile, user } = useAuth();
+  const avatarUrl = profile?.avatar_url || user?.user_metadata?.avatar_url;
 
   return (
     <header className="h-[96px] bg-[#000000] border-b border-white/5 flex items-center gap-5 px-6 md:px-16 sticky top-0 z-40">
@@ -19,8 +23,12 @@ export const Header = ({ onToggleMenu }) => {
         </button>
         
         {/* Mobile Profile Link */}
-        <button onClick={() => navigate('/profile')} className="md:hidden w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white/10 border border-white/10">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <button onClick={() => navigate('/profile')} className="md:hidden w-10 h-10 rounded-full overflow-hidden flex items-center justify-center bg-white/10 border border-white/10 shrink-0">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          )}
         </button>
       </div>
     </header>

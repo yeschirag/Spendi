@@ -106,8 +106,8 @@ export const GroupDetailsPage = () => {
 
   return (
     <div className="flex-1 p-6 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in pb-32 md:pb-16">
-      <button onClick={() => navigate('/groups')} className="flex items-center gap-2 text-white/50 hover:text-white mb-8 transition-colors w-fit">
-        <ArrowLeft size={16} /> Back
+      <button onClick={() => navigate('/groups')} className="hidden md:flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-8 text-sm uppercase tracking-widest font-medium">
+          <ArrowLeft size={16} /> Back
       </button>
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6 border-b border-white/5 pb-12">

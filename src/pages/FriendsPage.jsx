@@ -72,7 +72,7 @@ export const FriendsPage = () => {
       
       <button 
         onClick={() => navigate('/dashboard')}
-        className="flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12 text-sm uppercase tracking-widest font-medium w-fit"
+        className="hidden md:flex items-center gap-2 text-white/50 hover:text-white transition-colors mb-12 text-sm uppercase tracking-widest font-medium w-fit"
         style={{ fontFamily: "'Inter', sans-serif" }}
       >
         <ArrowLeft size={16} />

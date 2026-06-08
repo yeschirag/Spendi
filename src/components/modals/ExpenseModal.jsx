@@ -3,8 +3,10 @@ import { useAppContext } from '../../context/AppContext';
 import { X } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { CategoryModal } from './CategoryModal';
+import { useAuth } from '../../context/AuthContext';
 
 export const ExpenseModal = ({ onClose }) => {
+  const { user } = useAuth();
   const { friends, groups, categories: contextCategories, addExpense } = useAppContext();
   
   const [title, setTitle] = useState('');
@@ -16,6 +18,11 @@ export const ExpenseModal = ({ onClose }) => {
   const [paidBy, setPaidBy] = useState('You');
   const [splitWith, setSplitWith] = useState(['You']);
 
+  React.useEffect(() => {
+    setSplitWith(['You']);
+    setPaidBy('You');
+  }, [groupId]);
+
   const handleSplitWithChange = (friend) => {
     setSplitWith((prev) => 
       prev.includes(friend) 
@@ -23,6 +30,13 @@ export const ExpenseModal = ({ onClose }) => {
         : [...prev, friend]
     );
   };
+
+  const selectedGroup = groups.find(g => g.id === groupId);
+  const availableFriends = selectedGroup 
+    ? selectedGroup.group_members
+        .filter(m => m.user_id !== user?.id)
+        .map(m => m.profiles.display_name || m.profiles.full_name || m.profiles.email)
+    : friends;
 
   const [showCategoryModal, setShowCategoryModal] = useState(false);
 
@@ -127,7 +141,7 @@ export const ExpenseModal = ({ onClose }) => {
             <label htmlFor="expensePaidBy" className="text-sm font-light text-white/50 tracking-wide uppercase">Paid By</label>
             <select id="expensePaidBy" value={paidBy} onChange={(e) => setPaidBy(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-white transition-colors">
               <option value="You">You</option>
-              {friends.map(friend => <option key={friend} value={friend}>{friend}</option>)}
+              {availableFriends.map(friend => <option key={friend} value={friend}>{friend}</option>)}
             </select>
           </div>
 
@@ -142,7 +156,7 @@ export const ExpenseModal = ({ onClose }) => {
                 <span className="text-sm text-white/80 group-hover:text-white transition-colors">You</span>
               </label>
               
-              {friends.map(friend => (
+              {availableFriends.map(friend => (
                 <label key={friend} className="flex items-center gap-3 cursor-pointer group bg-white/5 px-4 py-2.5 rounded-full border border-white/5 hover:border-white/20 transition-all">
                   <div className={`w-4 h-4 rounded-sm flex items-center justify-center border transition-colors ${splitWith.includes(friend) ? 'bg-white border-white text-black' : 'bg-transparent border-white/30 text-transparent'}`}>
                     <svg viewBox="0 0 14 14" fill="none" className="w-3 h-3" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="2.5 7 5.5 10 11.5 3"></polyline></svg>

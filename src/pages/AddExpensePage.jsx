@@ -132,7 +132,7 @@ export const AddExpensePage = () => {
       <div className="mb-8 flex items-center justify-between">
         <button 
           onClick={() => step > 1 ? setStep(step - 1) : navigate(-1)}
-          className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm uppercase tracking-widest font-medium"
+          className="hidden md:flex items-center gap-2 text-white/50 hover:text-white transition-colors text-sm uppercase tracking-widest font-medium"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <ArrowLeft size={16} />
