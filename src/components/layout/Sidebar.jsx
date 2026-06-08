@@ -61,6 +61,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
             <Users size={18} strokeWidth={2} />
             Network
           </button>
+          <button onClick={() => handleNav('/groups')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/groups') || location.pathname.startsWith('/group/') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
+            <Users size={18} strokeWidth={2} />
+            Groups
+          </button>
           <button className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/history') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`} onClick={() => handleNav('/history')}>
             <History size={18} strokeWidth={2} />
             History

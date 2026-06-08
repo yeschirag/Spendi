@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AppProvider } from './context/AppContext';
 import { AuthProvider } from './context/AuthContext';
@@ -17,13 +17,40 @@ import { FriendsPage } from './pages/FriendsPage';
 import { FriendDetailsPage } from './pages/FriendDetailsPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { HistoryPage } from './pages/HistoryPage';
+import { GroupsPage } from './pages/GroupsPage';
+import { GroupDetailsPage } from './pages/GroupDetailsPage';
 import { SmoothScroll } from './components/layout/SmoothScroll';
 import { useAuth } from './context/AuthContext';
 import { useAppContext } from './context/AppContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useParams, useNavigate } from 'react-router-dom';
 import './index.css';
 
 import { AppTour } from './components/shared/AppTour';
+
+// Add JoinGroup component inline for handling invite links
+const JoinGroupRoute = () => {
+  const { token } = useParams();
+  const navigate = useNavigate();
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const handleJoin = async () => {
+      try {
+        const db = await import('./services/db');
+        const groupId = await db.joinGroup(token);
+        navigate(`/group/${groupId}`);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+    handleJoin();
+  }, [token, navigate]);
+
+  if (loading) return <div className="min-h-screen bg-black flex items-center justify-center text-white/50 animate-pulse">Joining group...</div>;
+  return <div className="min-h-screen bg-black flex flex-col items-center justify-center text-white p-6"><h1 className="text-3xl mb-4 text-red-400">Failed to join</h1><p className="text-white/50 mb-8">{error}</p><button onClick={() => navigate('/groups')} className="px-6 py-2 bg-white text-black rounded-full">Go to Groups</button></div>;
+};
 
 function MainLayout({ children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -50,7 +77,7 @@ function MainLayout({ children }) {
         <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
       </div>
       
-      <main className="flex-1 flex flex-col min-h-screen pb-24 md:pb-0 ml-0 md:ml-[280px]">
+      <main className="flex-1 flex flex-col min-w-0 min-h-screen pb-24 md:pb-0 ml-0 md:ml-[280px]">
         <Header onToggleMenu={toggleSidebar} />
         {children}
       </main>
@@ -80,10 +107,13 @@ function App() {
               <Routes>
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/auth" element={<AuthPage />} />
+                <Route path="/join/:token" element={<ProtectedRoute><JoinGroupRoute /></ProtectedRoute>} />
                 <Route path="/dashboard" element={<ProtectedRoute><MainLayout><Dashboard /></MainLayout></ProtectedRoute>} />
                 <Route path="/add-expense" element={<ProtectedRoute><MainLayout><AddExpensePage /></MainLayout></ProtectedRoute>} />
                 <Route path="/edit-expense/:id" element={<ProtectedRoute><MainLayout><EditExpensePage /></MainLayout></ProtectedRoute>} />
                 <Route path="/friends" element={<ProtectedRoute><MainLayout><FriendsPage /></MainLayout></ProtectedRoute>} />
+                <Route path="/groups" element={<ProtectedRoute><MainLayout><GroupsPage /></MainLayout></ProtectedRoute>} />
+                <Route path="/group/:id" element={<ProtectedRoute><MainLayout><GroupDetailsPage /></MainLayout></ProtectedRoute>} />
                 <Route path="/friend/:id" element={<ProtectedRoute><MainLayout><FriendDetailsPage /></MainLayout></ProtectedRoute>} />
                 <Route path="/history" element={<ProtectedRoute><MainLayout><HistoryPage /></MainLayout></ProtectedRoute>} />
                 <Route path="/profile" element={<ProtectedRoute><MainLayout><ProfilePage /></MainLayout></ProtectedRoute>} />

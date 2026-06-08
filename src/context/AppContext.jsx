@@ -15,15 +15,19 @@ export const AppProvider = ({ children }) => {
   const [friends, setFriends] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [balances, setBalances] = useState({});
+  const [categories, setCategories] = useState([]);
+  const [groups, setGroups] = useState([]);
   const [theme, setTheme] = useState('dark');
   const [loadingData, setLoadingData] = useState(true);
 
   const loadData = useCallback(async () => {
     try {
-      const [expensesData, friendsData, aggregatedBalances] = await Promise.all([
+      const [expensesData, friendsData, aggregatedBalances, categoriesData, groupsData] = await Promise.all([
         db.getExpenses(),
         db.getFriendsAndBalances(),
-        db.getAggregatedBalances()
+        db.getAggregatedBalances(),
+        db.getCategories(),
+        db.getGroups()
       ]);
       setExpenses(expensesData || []);
       
@@ -31,6 +35,8 @@ export const AppProvider = ({ children }) => {
       setFriends(friendsList);
       
       setBalances(aggregatedBalances || { youOwe: [], owesYou: [] });
+      setCategories(categoriesData || []);
+      setGroups(groupsData || []);
     } catch (err) {
       console.error("Error fetching data:", err);
     }
@@ -44,6 +50,8 @@ export const AppProvider = ({ children }) => {
       setFriends([]);
       setExpenses([]);
       setBalances({});
+      setCategories([]);
+      setGroups([]);
       setLoadingData(false);
     }
   }, [user, loadData]);
@@ -93,12 +101,15 @@ export const AppProvider = ({ children }) => {
     friends,
     expenses,
     balances,
+    categories,
+    groups,
     theme,
     toggleTheme,
     addFriend,
     addExpense,
     editExpense,
     removeExpense,
+    refreshData: loadData,
     loadingData
   };
 

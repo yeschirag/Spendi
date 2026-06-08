@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import { CategoryModal } from './CategoryModal';
 
 export const ExpenseModal = ({ onClose }) => {
-  const { friends, addExpense } = useAppContext();
+  const { friends, groups, categories: contextCategories, addExpense } = useAppContext();
   
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [category, setCategory] = useState('food');
+  const [searchParams] = useSearchParams();
+  const [groupId, setGroupId] = useState(searchParams.get('group') || '');
   const [paidBy, setPaidBy] = useState('You');
   const [splitWith, setSplitWith] = useState(['You']);
 
@@ -18,6 +22,28 @@ export const ExpenseModal = ({ onClose }) => {
         ? prev.filter((f) => f !== friend) 
         : [...prev, friend]
     );
+  };
+
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+  const handleCategoryChange = (e) => {
+    if (e.target.value === 'ADD_NEW') {
+      setShowCategoryModal(true);
+    } else {
+      setCategory(e.target.value);
+    }
+  };
+
+  const handleCreateCategory = async (newCategory) => {
+    try {
+      const db = await import('../../services/db');
+      const created = await db.addCustomCategory(newCategory.name, newCategory.icon, newCategory.color);
+      const { refreshData } = useAppContext();
+      if (refreshData) await refreshData();
+      setCategory(created.slug);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -30,7 +56,8 @@ export const ExpenseModal = ({ onClose }) => {
       date,
       category,
       paidBy,
-      splitWith
+      splitWith,
+      groupId: groupId || null
     });
     
     onClose();
@@ -68,15 +95,32 @@ export const ExpenseModal = ({ onClose }) => {
             
             <div className="flex flex-col gap-2">
               <label htmlFor="expenseCategory" className="text-sm font-light text-white/50 tracking-wide uppercase">Category</label>
-              <select id="expenseCategory" value={category} onChange={(e) => setCategory(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-white transition-colors">
-                <option value="food">Food & Drinks</option>
-                <option value="transport">Transport</option>
-                <option value="shopping">Shopping</option>
-                <option value="entertainment">Entertainment</option>
-                <option value="bills">Bills & Utilities</option>
-                <option value="other">Other</option>
+              <select id="expenseCategory" value={category} onChange={handleCategoryChange} className="w-full bg-black border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-white transition-colors">
+                {(contextCategories && contextCategories.length > 0) ? contextCategories.map(c => (
+                  <option key={c.id} value={c.slug}>{c.name}</option>
+                )) : (
+                  <>
+                    <option value="food">Food & Drinks</option>
+                    <option value="transport">Transport</option>
+                    <option value="shopping">Shopping</option>
+                    <option value="entertainment">Entertainment</option>
+                    <option value="bills">Bills & Utilities</option>
+                    <option value="other">Other</option>
+                  </>
+                )}
+                <option value="ADD_NEW">+ Add Custom Category</option>
               </select>
             </div>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <label htmlFor="expenseGroup" className="text-sm font-light text-white/50 tracking-wide uppercase">Group / Trip (Optional)</label>
+            <select id="expenseGroup" value={groupId} onChange={(e) => setGroupId(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-5 py-4 text-white focus:outline-none focus:border-white transition-colors">
+              <option value="">None (Personal / Friends)</option>
+              {groups.map(g => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
           </div>
 
           <div className="flex flex-col gap-2">
@@ -117,6 +161,16 @@ export const ExpenseModal = ({ onClose }) => {
           
         </form>
       </div>
+      
+      {showCategoryModal && (
+        <CategoryModal 
+          onClose={() => {
+            setShowCategoryModal(false);
+            if (category === 'ADD_NEW') setCategory('food');
+          }} 
+          onSubmit={handleCreateCategory} 
+        />
+      )}
     </div>
   );
 };

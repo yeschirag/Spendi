@@ -68,7 +68,7 @@ export const FriendsPage = () => {
   );
 
   return (
-    <div className="flex-1 p-6 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in pb-32 md:pb-16">
+    <div className="flex-1 min-w-0 p-6 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in pb-32 md:pb-16">
       
       <button 
         onClick={() => navigate('/dashboard')}
@@ -87,7 +87,7 @@ export const FriendsPage = () => {
       </div>
       
       {/* Tabs Header */}
-      <div className="flex border-b border-white/10 mb-8 overflow-x-auto hide-scrollbar">
+      <div className="flex border-b border-white/10 mb-8 overflow-x-auto hide-scrollbar shrink-0">
         <TabButton id="friends" label="My Friends" badgeCount={friends.length} />
         <TabButton id="add" label="Add Friend" />
         <TabButton id="requests" label="Requests" badgeCount={incomingRequests.length} />
@@ -185,8 +185,8 @@ export const FriendsPage = () => {
                   const hasIncoming = incomingRequests.some(r => r.requester_id === user.id);
 
                   return (
-                  <div key={user.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
-                    <div className="flex items-center gap-5">
+                  <div key={user.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl gap-4">
+                    <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
                       <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                         {user.avatar_url ? (
                           <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
@@ -196,9 +196,9 @@ export const FriendsPage = () => {
                           </span>
                         )}
                       </div>
-                      <div>
-                        <span className="text-lg text-white font-medium block">{user.display_name || user.full_name}</span>
-                        <span className="text-sm text-white/40 block font-light">{user.email}</span>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-lg text-white font-medium block truncate">{user.display_name || user.full_name}</span>
+                        <span className="text-sm text-white/40 block font-light truncate">{user.email}</span>
                       </div>
                     </div>
                     
@@ -253,8 +253,8 @@ export const FriendsPage = () => {
                   incomingRequests.map(req => {
                     const profile = req.requester;
                     return (
-                      <div key={req.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl">
-                        <div className="flex items-center gap-5">
+                      <div key={req.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl gap-4">
+                        <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
                           <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                             {profile?.avatar_url ? (
                               <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
@@ -264,9 +264,9 @@ export const FriendsPage = () => {
                               </span>
                             )}
                           </div>
-                          <div>
-                            <span className="text-lg text-white font-medium block">{profile?.display_name || profile?.full_name}</span>
-                            <span className="text-sm text-white/40 block font-light">{profile?.email}</span>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-lg text-white font-medium block truncate">{profile?.display_name || profile?.full_name}</span>
+                            <span className="text-sm text-white/40 block font-light truncate">{profile?.email}</span>
                           </div>
                         </div>
                         
@@ -303,8 +303,8 @@ export const FriendsPage = () => {
                   outgoingRequests.map(req => {
                     const profile = req.addressee;
                     return (
-                      <div key={req.id} className="flex items-center justify-between p-4 bg-transparent border border-white/5 rounded-2xl opacity-70">
-                        <div className="flex items-center gap-4">
+                      <div key={req.id} className="flex items-center justify-between p-4 bg-transparent border border-white/5 rounded-2xl opacity-70 gap-4">
+                        <div className="flex items-center gap-4 flex-1 min-w-0">
                           <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
                             {profile?.avatar_url ? (
                               <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
@@ -314,8 +314,8 @@ export const FriendsPage = () => {
                               </span>
                             )}
                           </div>
-                          <div>
-                            <span className="text-white font-medium block">{profile?.display_name || profile?.full_name}</span>
+                          <div className="flex-1 min-w-0">
+                            <span className="text-white font-medium block truncate">{profile?.display_name || profile?.full_name}</span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 text-white/30 text-sm">

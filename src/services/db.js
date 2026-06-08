@@ -71,7 +71,7 @@ export const addExpense = async (expenseData) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
 
-  const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {} } = expenseData;
+  const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {}, groupId = null } = expenseData;
 
   let categoryId = null;
   const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).limit(1).maybeSingle();
@@ -90,7 +90,8 @@ export const addExpense = async (expenseData) => {
       date, 
       category_id: categoryId, 
       created_by: user.id,
-      split_type: splitType 
+      split_type: splitType,
+      group_id: groupId
     }])
     .select()
     .single();
@@ -144,7 +145,7 @@ export const updateExpense = async (id, updates) => {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("User not authenticated");
 
-  const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {} } = updates;
+  const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {}, groupId = null } = updates;
 
   let categoryId = null;
   const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).limit(1).maybeSingle();
@@ -162,7 +163,8 @@ export const updateExpense = async (id, updates) => {
       amount, 
       date, 
       category_id: categoryId,
-      split_type: splitType
+      split_type: splitType,
+      group_id: groupId
     })
     .eq('id', id)
     .select()
@@ -348,4 +350,178 @@ export const getFriendsAndBalances = async () => {
       id: friendProfile.id 
     };
   });
+};
+
+// ====================================================
+// Categories
+// ====================================================
+
+export const getCategories = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  const { data, error } = await supabase
+    .from('categories')
+    .select('*')
+    .or(`is_system.eq.true,created_by.eq.${user.id}`)
+    .order('name');
+  if (error) throw error;
+  return data;
+};
+
+export const addCustomCategory = async (name, icon = 'Tag', color = '#ffffff') => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  
+  const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  
+  const { data, error } = await supabase
+    .from('categories')
+    .insert({
+      name,
+      slug,
+      icon,
+      color,
+      is_system: false,
+      created_by: user.id
+    })
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data;
+};
+
+// ====================================================
+// Groups
+// ====================================================
+
+export const getGroups = async () => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+  
+  const { data, error } = await supabase
+    .from('groups')
+    .select(`
+      *,
+      group_members!inner(user_id, role)
+    `)
+    .eq('group_members.user_id', user.id)
+    .order('created_at', { ascending: false });
+    
+  if (error) throw error;
+  return data;
+};
+
+export const createGroup = async (name, description = '') => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  
+  const { data: group, error: groupError } = await supabase
+    .from('groups')
+    .insert({ name, description, created_by: user.id })
+    .select()
+    .single();
+    
+  if (groupError) throw groupError;
+  
+  const { error: memberError } = await supabase
+    .from('group_members')
+    .insert({ group_id: group.id, user_id: user.id, role: 'admin' });
+    
+  if (memberError) throw memberError;
+  
+  return group;
+};
+
+export const getGroupDetails = async (groupId) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  
+  const { data: group, error: groupError } = await supabase
+    .from('groups')
+    .select(`
+      *,
+      group_members(user_id, role, profiles(id, full_name, display_name, email, avatar_url))
+    `)
+    .eq('id', groupId)
+    .single();
+    
+  if (groupError) throw groupError;
+  
+  const { data: expenses, error: expError } = await supabase
+    .from('expenses')
+    .select(`
+      *,
+      category:categories(name, slug),
+      expense_participants (
+        user_id,
+        amount_paid,
+        amount_owed,
+        profiles (id, full_name, display_name, email, avatar_url)
+      )
+    `)
+    .eq('group_id', groupId)
+    .eq('is_deleted', false)
+    .order('date', { ascending: false });
+    
+  if (expError) throw expError;
+  
+  return { group, expenses };
+};
+
+export const createInviteLink = async (groupId) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  
+  // Generating a random 16 character token using Web Crypto API or Math.random fallback
+  const array = new Uint8Array(8);
+  crypto.getRandomValues(array);
+  const token = Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
+  
+  const { data, error } = await supabase
+    .from('group_invites')
+    .insert({
+      group_id: groupId,
+      token,
+      created_by: user.id
+    })
+    .select()
+    .single();
+    
+  if (error) throw error;
+  return data.token;
+};
+
+export const joinGroup = async (token) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+  
+  const { data: invite, error: inviteError } = await supabase
+    .from('group_invites')
+    .select('group_id')
+    .eq('token', token)
+    .gt('expires_at', new Date().toISOString())
+    .maybeSingle();
+    
+  if (inviteError || !invite) throw new Error("Invalid or expired invite link");
+  
+  const { data: existing } = await supabase
+    .from('group_members')
+    .select('user_id')
+    .eq('group_id', invite.group_id)
+    .eq('user_id', user.id)
+    .maybeSingle();
+    
+  if (existing) return invite.group_id;
+  
+  const { error: joinError } = await supabase
+    .from('group_members')
+    .insert({
+      group_id: invite.group_id,
+      user_id: user.id,
+      role: 'member'
+    });
+    
+  if (joinError) throw joinError;
+  return invite.group_id;
 };

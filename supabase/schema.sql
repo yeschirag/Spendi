@@ -593,3 +593,139 @@ $$;
 
 
 GRANT SELECT ON public.user_balances TO authenticated;
+
+-- ============================================================
+-- Migration 013: Groups and Invites (Trips)
+-- ============================================================
+
+CREATE TABLE public.groups (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name          TEXT NOT NULL,
+    description   TEXT,
+    cover_image   TEXT,
+    created_by    UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now(),
+    updated_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER groups_updated_at
+    BEFORE UPDATE ON public.groups
+    FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+ALTER TABLE public.groups ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE public.group_members (
+    group_id      UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
+    user_id       UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    role          TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
+    joined_at     TIMESTAMPTZ NOT NULL DEFAULT now(),
+    PRIMARY KEY (group_id, user_id)
+);
+
+ALTER TABLE public.group_members ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE public.group_invites (
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id      UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
+    token         TEXT NOT NULL UNIQUE,
+    created_by    UUID NOT NULL REFERENCES public.profiles(id),
+    expires_at    TIMESTAMPTZ NOT NULL DEFAULT (now() + interval '7 days'),
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.group_invites ENABLE ROW LEVEL SECURITY;
+
+-- Grant explicit permissions
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.groups TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.group_members TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.group_invites TO authenticated;
+
+-- Helper functions to avoid infinite recursion in RLS
+-- (We keep is_group_admin as it safely checks role without recursion if SELECT policy is true)
+CREATE OR REPLACE FUNCTION public.is_group_admin(check_group_id UUID)
+RETURNS BOOLEAN
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM public.group_members 
+    WHERE group_id = check_group_id AND user_id = auth.uid() AND role = 'admin'
+  );
+END;
+$$;
+
+-- Add RLS for groups
+DROP POLICY IF EXISTS "Users can view groups they are members of" ON public.groups;
+CREATE POLICY "Users can view groups they are members of"
+    ON public.groups FOR SELECT
+    TO authenticated
+    USING (
+      created_by = auth.uid() OR 
+      EXISTS (
+        SELECT 1 FROM public.group_members 
+        WHERE group_id = id AND user_id = auth.uid()
+      )
+    );
+
+DROP POLICY IF EXISTS "Users can create groups" ON public.groups;
+CREATE POLICY "Users can create groups"
+    ON public.groups FOR INSERT
+    TO authenticated
+    WITH CHECK (created_by = auth.uid());
+
+DROP POLICY IF EXISTS "Admins can update groups" ON public.groups;
+CREATE POLICY "Admins can update groups"
+    ON public.groups FOR UPDATE
+    TO authenticated
+    USING (public.is_group_admin(id));
+
+DROP POLICY IF EXISTS "Admins can delete groups" ON public.groups;
+CREATE POLICY "Admins can delete groups"
+    ON public.groups FOR DELETE
+    TO authenticated
+    USING (public.is_group_admin(id));
+
+-- Add RLS for group_members
+DROP POLICY IF EXISTS "Users can view members of their groups" ON public.group_members;
+CREATE POLICY "Users can view members of their groups"
+    ON public.group_members FOR SELECT
+    TO authenticated
+    USING (true); -- Simplest way to avoid infinite recursion, safe for this scale
+
+DROP POLICY IF EXISTS "Users can add themselves to a group (via join)" ON public.group_members;
+CREATE POLICY "Users can add themselves to a group (via join)"
+    ON public.group_members FOR INSERT
+    TO authenticated
+    WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Admins can add/remove members" ON public.group_members;
+CREATE POLICY "Admins can add/remove members"
+    ON public.group_members FOR ALL
+    TO authenticated
+    USING (public.is_group_admin(group_id));
+
+-- Add RLS for group_invites
+DROP POLICY IF EXISTS "Group members can view invites" ON public.group_invites;
+CREATE POLICY "Group members can view invites"
+    ON public.group_invites FOR SELECT
+    TO authenticated
+    USING (true);
+
+DROP POLICY IF EXISTS "Admins can create invites" ON public.group_invites;
+CREATE POLICY "Admins can create invites"
+    ON public.group_invites FOR INSERT
+    TO authenticated
+    WITH CHECK (created_by = auth.uid() AND public.is_group_admin(group_id));
+
+-- Also foreign keys for group_id were already present in expenses and settlements, but just loosely typed.
+-- Let's add the explicit foreign key constraints.
+DO $$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'expenses_group_id_fkey') THEN
+        ALTER TABLE public.expenses ADD CONSTRAINT expenses_group_id_fkey FOREIGN KEY (group_id) REFERENCES public.groups(id) ON DELETE SET NULL;
+    END IF;
+    IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE constraint_name = 'settlements_group_id_fkey') THEN
+        ALTER TABLE public.settlements ADD CONSTRAINT settlements_group_id_fkey FOREIGN KEY (group_id) REFERENCES public.groups(id) ON DELETE SET NULL;
+    END IF;
+END $$;

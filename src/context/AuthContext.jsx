@@ -134,7 +134,16 @@ export const AuthProvider = ({ children }) => {
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {loading ? (
+        <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-6">
+          <img src="/logo.png" alt="Spendi" className="w-12 h-12 object-contain filter invert brightness-0 animate-pulse" />
+          <div className="w-48 h-1 bg-white/10 rounded-full overflow-hidden">
+            <div className="h-full bg-white/40 w-1/2 animate-[progress_1.5s_ease-in-out_infinite]"></div>
+          </div>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 };
