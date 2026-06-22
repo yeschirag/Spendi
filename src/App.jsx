@@ -118,6 +118,12 @@ function App() {
       });
 
     const playClick = (e) => {
+      // Disable click audio on mobile/touch devices for a better UX
+      const isMobile = window.matchMedia('(max-width: 768px)').matches || 
+                       ('ontouchstart' in window) || 
+                       (navigator.maxTouchPoints > 0);
+      if (isMobile) return;
+
       if (!audio) return;
       const target = e.target;
       if (!target) return;

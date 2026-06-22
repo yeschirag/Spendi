@@ -4,32 +4,144 @@
 
 @layer base {
   :root {
-    --background: 220 100% 1%; /* Brand Black #000103 */
-    --foreground: 60 100% 99%; /* Brand Porcelain #FFFFFA */
-    --muted-foreground: 270 1% 65%; /* Charcoal lightened slightly */
-    --primary: 60 100% 99%; /* Brand Porcelain #FFFFFA */
-    --primary-foreground: 220 100% 1%; /* Brand Black #000103 */
-    --secondary: 257 7% 21%; /* Brand Graphite #333138 */
-    --secondary-foreground: 60 100% 99%; /* Brand Porcelain #FFFFFA */
-    --muted: 270 1% 32%; /* Brand Charcoal #515052 */
-    --accent: 1 100% 59%; /* Brand Cinnabar #FF312E */
-    --accent-foreground: 60 100% 99%; /* Brand Porcelain #FFFFFA */
-    --border: 257 7% 21%; /* Brand Graphite #333138 */
-    --input: 257 7% 21%; /* Brand Graphite #333138 */
-    --ring: 1 100% 59%; /* Brand Cinnabar #FF312E */
+    /* Design System Colors (Light mode default) */
+    --color-bg: #F7F7F8;
+    --color-surface: #FFFFFF;
+    --color-surface-elevated: #FFFFFF;
+    --color-surface-glass: rgba(255,255,255,0.72);
+    --color-border: rgba(0,0,0,0.08);
+    --color-border-strong: rgba(0,0,0,0.14);
+    --color-text-primary: #0C0C0F;
+    --color-text-secondary: #44444F;
+    --color-text-muted: #888896;
+    --color-accent: #FF312E;
+    --color-accent-hover: #E02421;
+    --color-accent-muted: rgba(255,49,46,0.10);
+    --color-destructive: #E5484D;
+    --color-destructive-muted: rgba(229,72,77,0.10);
+    --color-success: #30A46C;
+    --color-success-muted: rgba(48,164,108,0.10);
+    --color-warning: #E08C00;
+    --color-warning-muted: rgba(224,140,0,0.10);
+
+    /* Financial State Tokens (Light) */
+    --color-financial-owed: #30A46C;
+    --color-financial-owed-bg: rgba(48,164,108,0.08);
+    --color-financial-owes: #E5484D;
+    --color-financial-owes-bg: rgba(229,72,77,0.08);
+    --color-financial-settled: #888896;
+    --color-financial-settled-bg: rgba(136,136,150,0.08);
+
+    /* Standard Tailwind color scheme mapping for Light Mode */
+    --background: 240 10% 97%;
+    --foreground: 240 10% 5%;
+    --muted-foreground: 240 5% 56%;
+    --primary: 240 5% 5%;
+    --primary-foreground: 240 10% 97%;
+    --secondary: 240 5% 90%;
+    --secondary-foreground: 240 5% 5%;
+    --muted: 240 5% 90%;
+    --accent: 1 100% 59%;
+    --accent-foreground: 240 10% 97%;
+    --border: 240 5% 90%;
+    --input: 240 5% 90%;
+    --ring: 1 100% 59%;
     --radius: 0.5rem;
+
+    /* Spacing system */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --space-20: 80px;
+
+    /* Radii */
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+    --radius-xl: 18px;
+    --radius-2xl: 24px;
+    --radius-full: 9999px;
+
+    /* Shadows (Light) */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
+    --shadow-float: 0 8px 24px rgba(0,0,0,0.14), 0 2px 6px rgba(0,0,0,0.08);
+
+    /* Fonts */
     --font-display: 'Instrument Serif', serif;
     --font-body: 'Inter', sans-serif;
+  }
+
+  .dark {
+    /* Design System Colors (Dark Mode) */
+    --color-bg: #0C0C0F;
+    --color-surface: #18181C;
+    --color-surface-elevated: #1F1F24;
+    --color-surface-glass: rgba(18,18,22,0.76);
+    --color-border: rgba(255,255,255,0.08);
+    --color-border-strong: rgba(255,255,255,0.16);
+    --color-text-primary: #EDEDEF;
+    --color-text-secondary: #A0A0AB;
+    --color-text-muted: #5A5A68;
+    --color-accent: #FF4C4A;
+    --color-accent-hover: #FF6664;
+    --color-accent-muted: rgba(255,76,74,0.12);
+    --color-destructive: #F2555A;
+    --color-destructive-muted: rgba(242,85,90,0.12);
+    --color-success: #3DB07A;
+    --color-success-muted: rgba(61,176,122,0.12);
+    --color-warning: #F5A623;
+    --color-warning-muted: rgba(245,166,35,0.12);
+
+    /* Financial State Tokens (Dark) */
+    --color-financial-owed: #3DB07A;
+    --color-financial-owed-bg: rgba(61,176,122,0.10);
+    --color-financial-owes: #F2555A;
+    --color-financial-owes-bg: rgba(242,85,90,0.10);
+    --color-financial-settled: #5A5A68;
+    --color-financial-settled-bg: rgba(90,90,104,0.10);
+
+    /* Standard Tailwind color scheme mapping for Dark Mode */
+    --background: 240 10% 5%;
+    --foreground: 240 10% 93%;
+    --muted-foreground: 240 5% 38%;
+    --primary: 240 10% 93%;
+    --primary-foreground: 240 10% 5%;
+    --secondary: 240 7% 10%;
+    --secondary-foreground: 240 10% 93%;
+    --muted: 240 7% 10%;
+    --accent: 1 100% 65%;
+    --accent-foreground: 240 10% 5%;
+    --border: 240 5% 15%;
+    --input: 240 5% 15%;
+    --ring: 1 100% 65%;
+
+    /* Shadows (Dark) */
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.20);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.28);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.34);
+    --shadow-float: 0 8px 24px rgba(0,0,0,0.40);
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    touch-action: manipulation; /* Eliminate 300ms tap delay on mobile */
   }
   body {
-    @apply bg-background text-foreground;
+    background-color: var(--color-bg);
+    color: var(--color-text-primary);
     font-family: var(--font-body);
+    transition: background-color 200ms ease, color 200ms ease;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
@@ -38,22 +150,48 @@
 
 @layer utilities {
   .glass-card {
-    background: rgba(51, 50, 52, 0.35); /* Brand Charcoal/Graphite mix */
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 250, 0.08); /* Porcelain border tint */
-    box-shadow: 
-      inset 0 1px 1px rgba(255, 255, 255, 0.15),
-      0 8px 32px 0 rgba(0, 1, 3, 0.37);
+    background: rgba(255, 255, 255, 0.68);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+    border: 1px solid rgba(255, 255, 255, 0.20);
+    box-shadow: var(--shadow-md);
+    border-radius: var(--radius-xl);
+  }
+
+  .dark .glass-card {
+    background: rgba(28, 28, 34, 0.72);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .glass-nav {
+    background: var(--color-surface-glass);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .glass-modal {
+    background: var(--color-surface-elevated);
+    border-radius: var(--radius-2xl);
+  }
+
+  .glass-overlay {
+    background: rgba(0, 0, 0, 0.40);
+    backdrop-filter: blur(6px);
+  }
+  
+  .dark .glass-overlay {
+    background: rgba(0, 0, 0, 0.60);
   }
 
   .liquid-glass {
-    background: rgba(255, 255, 255, 0.01);
-    background-blend-mode: luminosity;
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
+    background-color: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(24px) saturate(120%);
+    -webkit-backdrop-filter: blur(24px) saturate(120%);
     border: none;
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      0 12px 32px 0 rgba(0, 0, 0, 0.4);
     position: relative;
     overflow: hidden;
   }
@@ -63,11 +201,13 @@
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 1.4px;
-    background: linear-gradient(180deg,
-      rgba(255,255,255,0.45) 0%, rgba(255,255,255,0.15) 20%,
-      rgba(255,255,255,0) 40%, rgba(255,255,255,0) 60%,
-      rgba(255,255,255,0.15) 80%, rgba(255,255,255,0.45) 100%);
+    padding: 1px;
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.5) 0%, 
+      rgba(255, 255, 255, 0.05) 40%,
+      rgba(255, 255, 255, 0) 50%,
+      rgba(255, 255, 255, 0.05) 60%,
+      rgba(255, 255, 255, 0.3) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -121,3 +261,12 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.2);
 }
+
+/* liquid-glass-react styling utilities */
+.w-full > .glass {
+  width: 100% !important;
+}
+.flex > .glass {
+  display: flex !important;
+}
+

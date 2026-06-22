@@ -20,6 +20,17 @@ export const AppProvider = ({ children }) => {
   const [theme, setTheme] = useState('dark');
   const [loadingData, setLoadingData] = useState(true);
 
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+      root.classList.remove('light');
+    } else {
+      root.classList.add('light');
+      root.classList.remove('dark');
+    }
+  }, [theme]);
+
   const loadData = useCallback(async () => {
     try {
       const [expensesData, friendsData, aggregatedBalances, categoriesData, groupsData] = await Promise.all([

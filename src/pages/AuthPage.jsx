@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { GlassButton } from '../components/ui/GlassButton';
 
 export const AuthPage = () => {
   const { login, signUp, signInWithGoogle } = useAuth();
@@ -109,10 +110,9 @@ export const AuthPage = () => {
           )}
 
           {/* Social Sign In */}
-          <button 
+          <GlassButton
             onClick={handleGoogleSignIn}
-            className="w-full flex justify-center items-center gap-3 py-3.5 px-4 rounded-xl text-sm font-medium text-white bg-brand-graphite/35 hover:bg-brand-graphite/60 border border-border transition-all duration-300 shadow-md hover:scale-[1.01] active:scale-[0.99]"
-            style={{ fontFamily: "'Inter', sans-serif" }}
+            className="w-full flex justify-center items-center gap-3 py-3.5 px-4 rounded-xl text-sm font-medium text-white bg-brand-graphite/35 hover:bg-brand-graphite/60 border-0 transition-all duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
               <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -121,7 +121,7 @@ export const AuthPage = () => {
               <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
             Continue with Google
-          </button>
+          </GlassButton>
 
           {/* Divider */}
           <div className="my-8 relative">
@@ -194,13 +194,13 @@ export const AuthPage = () => {
             </div>
 
             <div className="pt-4">
-              <button 
+              <GlassButton 
                 type="submit" 
                 disabled={loading} 
-                className="w-full flex justify-center items-center gap-2 py-4 px-4 rounded-xl text-sm font-semibold text-brand-black bg-brand-porcelain hover:bg-brand-porcelain/90 active:scale-[0.99] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none shadow-xl"
+                className="w-full flex justify-center items-center gap-2 py-4 px-4 rounded-xl text-sm font-semibold text-brand-black bg-brand-porcelain hover:bg-brand-porcelain/90 active:scale-[0.99] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none"
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : (isLogin ? 'Sign in' : 'Create account')}
-              </button>
+              </GlassButton>
             </div>
           </form>
 
