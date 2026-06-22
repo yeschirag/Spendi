@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Search, UserPlus, Check, X, Trash2, Clock } from 'lucide-react';
 import { useFriends } from '../context/FriendContext';
@@ -47,26 +47,6 @@ export const FriendsPage = () => {
     }
   };
 
-  const TabButton = ({ id, label, badgeCount }) => (
-    <button
-      onClick={() => setActiveTab(id)}
-      className={`relative px-6 py-3 text-sm font-medium tracking-wide uppercase transition-colors ${
-        activeTab === id ? 'text-white' : 'text-white/40 hover:text-white/70'
-      }`}
-      style={{ fontFamily: "'Inter', sans-serif" }}
-    >
-      {label}
-      {badgeCount > 0 && (
-        <span className="ml-2 bg-white text-black text-xs px-2 py-0.5 rounded-full font-bold">
-          {badgeCount}
-        </span>
-      )}
-      {activeTab === id && (
-        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-white"></div>
-      )}
-    </button>
-  );
-
   return (
     <div className="flex-1 min-w-0 p-6 md:p-16 flex flex-col max-w-7xl mx-auto w-full bg-transparent min-h-screen animate-fade-in pb-32 md:pb-16">
       
@@ -79,7 +59,7 @@ export const FriendsPage = () => {
         Back
       </button>
 
-      <div className="mb-12">
+      <div className="mb-12 hidden md:block">
         <h1 className="text-6xl md:text-8xl text-white font-normal tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
           Network.
         </h1>
@@ -87,10 +67,55 @@ export const FriendsPage = () => {
       </div>
       
       {/* Tabs Header */}
-      <div className="flex border-b border-white/10 mb-8 overflow-x-auto hide-scrollbar shrink-0">
-        <TabButton id="friends" label="My Friends" badgeCount={friends.length} />
-        <TabButton id="add" label="Add Friend" />
-        <TabButton id="requests" label="Requests" badgeCount={incomingRequests.length} />
+      <div className="flex border-b border-border/40 mb-8 overflow-x-auto hide-scrollbar shrink-0">
+        <button
+          onClick={() => setActiveTab('friends')}
+          className={`relative px-6 py-3 text-sm font-medium tracking-wide uppercase transition-colors ${
+            activeTab === 'friends' ? 'text-white' : 'text-white/40 hover:text-white/70'
+          }`}
+          style={{ fontFamily: "'Inter', sans-serif" }}
+        >
+          My Friends
+          {friends.length > 0 && (
+            <span className="ml-2 bg-brand-porcelain text-brand-black text-xs px-2 py-0.5 rounded-full font-bold">
+              {friends.length}
+            </span>
+          )}
+          {activeTab === 'friends' && (
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-brand-porcelain"></div>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('add')}
+          className={`relative px-6 py-3 text-sm font-medium tracking-wide uppercase transition-colors ${
+            activeTab === 'add' ? 'text-white' : 'text-white/40 hover:text-white/70'
+          }`}
+          style={{ fontFamily: "'Inter', sans-serif" }}
+        >
+          Add Friend
+          {activeTab === 'add' && (
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-brand-porcelain"></div>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('requests')}
+          className={`relative px-6 py-3 text-sm font-medium tracking-wide uppercase transition-colors ${
+            activeTab === 'requests' ? 'text-white' : 'text-white/40 hover:text-white/70'
+          }`}
+          style={{ fontFamily: "'Inter', sans-serif" }}
+        >
+          Requests
+          {incomingRequests.length > 0 && (
+            <span className="ml-2 bg-brand-porcelain text-brand-black text-xs px-2 py-0.5 rounded-full font-bold">
+              {incomingRequests.length}
+            </span>
+          )}
+          {activeTab === 'requests' && (
+            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-brand-porcelain"></div>
+          )}
+        </button>
       </div>
 
       <div className="flex-1">
@@ -100,7 +125,7 @@ export const FriendsPage = () => {
             {loading ? (
               <p className="text-white/50">Loading...</p>
             ) : friends.length === 0 ? (
-              <div className="p-12 border border-white/5 rounded-3xl text-center text-white/30 font-light flex flex-col items-center gap-4">
+              <div className="p-12 border border-border/45 rounded-3xl text-center text-white/30 font-light flex flex-col items-center gap-4">
                 <Search size={32} className="opacity-50" />
                 <p>You haven't added any friends yet.</p>
                 <button onClick={() => setActiveTab('add')} className="mt-2 text-white/70 hover:text-white underline underline-offset-4">Find friends</button>
@@ -113,9 +138,9 @@ export const FriendsPage = () => {
                 const isSettled = owesYou === 0 && youOwe === 0;
 
                 return (
-                  <div key={friend.friendshipId} onClick={() => navigate(`/friend/${friend.id}`)} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors group cursor-pointer">
+                  <div key={friend.friendshipId} onClick={() => navigate(`/friend/${friend.id}`)} className="flex items-center justify-between p-6 bg-brand-graphite/20 border border-border rounded-2xl hover:bg-brand-graphite/35 transition-colors group cursor-pointer">
                     <div className="flex items-center gap-5 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-brand-graphite/30 border border-border flex items-center justify-center overflow-hidden shrink-0">
                         {friend.avatar_url ? (
                           <img src={friend.avatar_url} alt={friend.full_name} className="w-full h-full object-cover" />
                         ) : (
@@ -130,9 +155,9 @@ export const FriendsPage = () => {
                           {isSettled ? (
                             <span className="text-xs text-white/40 uppercase tracking-widest font-medium shrink-0">Settled up</span>
                           ) : youOwe > 0 ? (
-                            <span className="text-xs text-red-400 uppercase tracking-widest font-medium shrink-0">You owe ₹{youOwe.toFixed(2)}</span>
+                            <span className="text-xs text-brand-cinnabar font-semibold uppercase tracking-widest shrink-0">You owe ₹{youOwe.toFixed(2)}</span>
                           ) : (
-                            <span className="text-xs text-green-400 uppercase tracking-widest font-medium shrink-0">Owes you ₹{owesYou.toFixed(2)}</span>
+                            <span className="text-xs text-brand-porcelain font-semibold uppercase tracking-widest shrink-0">Owes you ₹{owesYou.toFixed(2)}</span>
                           )}
                         </div>
                       </div>
@@ -145,7 +170,7 @@ export const FriendsPage = () => {
                           removeFriend(friend.friendshipId);
                         }
                       }}
-                      className="p-3 text-red-400/50 hover:text-red-400 hover:bg-red-400/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
+                      className="p-3 text-brand-cinnabar/50 hover:text-brand-cinnabar hover:bg-brand-cinnabar/10 rounded-full transition-colors opacity-0 group-hover:opacity-100"
                       title="Remove Friend"
                     >
                       <Trash2 size={18} />
@@ -167,7 +192,7 @@ export const FriendsPage = () => {
                 placeholder="Search by email or name..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-full py-5 pl-16 pr-6 text-white placeholder-white/30 focus:outline-none focus:border-white/40 focus:bg-white/10 transition-all text-lg"
+                className="w-full bg-brand-graphite/20 border border-border rounded-full py-5 pl-16 pr-6 text-white placeholder-white/30 focus:outline-none focus:border-white/40 focus:bg-brand-graphite/40 transition-all text-lg"
                 style={{ fontFamily: "'Inter', sans-serif" }}
                 autoFocus
               />
@@ -185,9 +210,9 @@ export const FriendsPage = () => {
                   const hasIncoming = incomingRequests.some(r => r.requester_id === user.id);
 
                   return (
-                  <div key={user.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl gap-4">
+                  <div key={user.id} className="flex items-center justify-between p-6 bg-brand-graphite/20 border border-border rounded-2xl gap-4">
                     <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
-                      <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-12 h-12 rounded-full bg-brand-graphite/30 border border-border flex items-center justify-center overflow-hidden shrink-0">
                         {user.avatar_url ? (
                           <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
                         ) : (
@@ -203,12 +228,12 @@ export const FriendsPage = () => {
                     </div>
                     
                     {isFriend ? (
-                      <button disabled className="px-6 py-2.5 bg-white/10 text-white/50 rounded-full text-sm font-medium cursor-not-allowed flex items-center gap-2">
+                      <button disabled className="px-6 py-2.5 bg-brand-graphite/30 text-white/50 rounded-full text-sm font-medium cursor-not-allowed flex items-center gap-2">
                         <Check size={16} />
                         Friends
                       </button>
                     ) : hasOutgoing ? (
-                      <button disabled className="px-6 py-2.5 bg-white/10 text-white/50 rounded-full text-sm font-medium cursor-not-allowed flex items-center gap-2">
+                      <button disabled className="px-6 py-2.5 bg-brand-graphite/30 text-white/50 rounded-full text-sm font-medium cursor-not-allowed flex items-center gap-2">
                         <Clock size={16} />
                         Request Sent
                       </button>
@@ -218,7 +243,7 @@ export const FriendsPage = () => {
                           const req = incomingRequests.find(r => r.requester_id === user.id);
                           if(req) acceptRequest(req.id);
                         }}
-                        className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                        className="px-6 py-2.5 bg-brand-porcelain text-brand-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                       >
                         <Check size={16} />
                         Accept
@@ -226,7 +251,7 @@ export const FriendsPage = () => {
                     ) : (
                       <button 
                         onClick={() => handleSendRequest(user.id)}
-                        className="px-6 py-2.5 bg-white text-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                        className="px-6 py-2.5 bg-brand-porcelain text-brand-black rounded-full text-sm font-medium hover:scale-[1.02] transition-transform flex items-center gap-2 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
                       >
                         <UserPlus size={16} />
                         Add
@@ -253,9 +278,9 @@ export const FriendsPage = () => {
                   incomingRequests.map(req => {
                     const profile = req.requester;
                     return (
-                      <div key={req.id} className="flex items-center justify-between p-6 bg-white/5 border border-white/10 rounded-2xl gap-4">
+                      <div key={req.id} className="flex items-center justify-between p-6 bg-brand-graphite/20 border border-border rounded-2xl gap-4">
                         <div className="flex items-center gap-4 md:gap-5 flex-1 min-w-0">
-                          <div className="w-12 h-12 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="w-12 h-12 rounded-full bg-brand-graphite/30 border border-border flex items-center justify-center overflow-hidden shrink-0">
                             {profile?.avatar_url ? (
                               <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
                             ) : (
@@ -273,14 +298,14 @@ export const FriendsPage = () => {
                         <div className="flex items-center gap-2">
                           <button 
                             onClick={() => acceptRequest(req.id)}
-                            className="p-3 bg-white text-black rounded-full hover:scale-105 transition-transform"
+                            className="p-3 bg-brand-porcelain text-brand-black rounded-full hover:scale-105 transition-transform"
                             title="Accept"
                           >
                             <Check size={18} />
                           </button>
                           <button 
                             onClick={() => rejectRequest(req.id)}
-                            className="p-3 bg-white/10 text-white hover:bg-white/20 rounded-full transition-colors"
+                            className="p-3 bg-brand-graphite/30 text-white hover:bg-brand-graphite/50 rounded-full transition-colors border border-border"
                             title="Decline"
                           >
                             <X size={18} />
@@ -303,9 +328,9 @@ export const FriendsPage = () => {
                   outgoingRequests.map(req => {
                     const profile = req.addressee;
                     return (
-                      <div key={req.id} className="flex items-center justify-between p-4 bg-transparent border border-white/5 rounded-2xl opacity-70 gap-4">
+                      <div key={req.id} className="flex items-center justify-between p-4 bg-transparent border border-border/40 rounded-2xl opacity-70 gap-4">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                          <div className="w-10 h-10 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                          <div className="w-10 h-10 rounded-full bg-brand-graphite/20 border border-border flex items-center justify-center overflow-hidden shrink-0">
                             {profile?.avatar_url ? (
                               <img src={profile.avatar_url} alt={profile.full_name} className="w-full h-full object-cover" />
                             ) : (

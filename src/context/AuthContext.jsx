@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext();
@@ -41,36 +41,67 @@ export const AuthProvider = ({ children }) => {
         }
       }
       
-      setProfile(data);
+      return data;
     } catch (err) {
       console.error('Error fetching user profile:', err);
-      setProfile(null);
+      return null;
     }
   };
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    let active = true;
+    let isInitial = true;
+
+    const handleAuthChange = async (session) => {
+      if (!active) return;
       const authUser = session?.user ?? null;
       setUser(authUser);
+
       if (authUser) {
-        await fetchProfile(authUser.id);
+        const profileData = await fetchProfile(authUser.id);
+        if (active) {
+          setProfile(profileData);
+        }
+      } else {
+        if (active) {
+          setProfile(null);
+        }
       }
-      setLoading(false);
+
+      if (active) {
+        setLoading(false);
+      }
+    };
+
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (isInitial) {
+        isInitial = false;
+        handleAuthChange(session);
+      }
+    }).catch((err) => {
+      console.error("Error getting initial session:", err);
+      if (active) {
+        setLoading(false);
+      }
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const authUser = session?.user ?? null;
-      setUser(authUser);
-      if (authUser) {
-        await fetchProfile(authUser.id);
-      } else {
-        setProfile(null);
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setTimeout(() => {
+        if (!active) return;
+        if (event === 'INITIAL_SESSION' && !isInitial) {
+          return;
+        }
+        isInitial = false;
+        handleAuthChange(session);
+      }, 0);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = (email, password, fullName, phone) => {

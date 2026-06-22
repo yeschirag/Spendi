@@ -37,50 +37,50 @@ export const Sidebar = ({ isOpen, onClose }) => {
         />
       )}
 
-      <aside className={`fixed top-0 left-0 bottom-0 w-[280px] bg-black border-r border-white/10 flex flex-col z-50 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
-        <div className="h-[96px] px-8 flex items-center justify-between border-b border-white/10">
+      <aside className={`fixed top-0 left-0 bottom-0 w-[280px] bg-background border-r border-border flex flex-col z-50 transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${isOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`}>
+        <div className="h-[96px] px-8 flex items-center justify-between border-b border-border">
           <Link to="/" className="flex items-center gap-3 hover:opacity-80 transition-opacity" onClick={onClose}>
             <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain filter invert brightness-0" />
             <div className="text-4xl text-white tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>Spendi</div>
           </Link>
-          <button className="md:hidden w-9 h-9 rounded-full border border-white/10 flex items-center justify-center text-white/50 hover:text-white transition-colors" onClick={onClose}>
+          <button className="md:hidden w-9 h-9 rounded-full border border-border flex items-center justify-center text-white/50 hover:text-white transition-colors" onClick={onClose}>
             <X size={18} />
           </button>
         </div>
       
         <nav className="flex-1 px-4 py-8 flex flex-col gap-2 overflow-y-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
-          <button onClick={() => handleNav('/dashboard')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/dashboard') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleNav('/dashboard')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/dashboard') ? 'font-medium text-white glass-card' : 'font-light text-white/50 hover:text-white hover:bg-brand-graphite/20'}`}>
             <LayoutDashboard size={18} strokeWidth={2} />
             Dashboard
           </button>
-          <button onClick={() => handleNav('/add-expense')} className={`tour-add-expense flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/add-expense') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleNav('/add-expense')} className={`tour-add-expense flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/add-expense') ? 'font-medium text-white glass-card' : 'font-light text-white/50 hover:text-white hover:bg-brand-graphite/20'}`}>
             <Receipt size={18} strokeWidth={2} />
             Add Expense
           </button>
-          <button onClick={() => handleNav('/friends')} className={`tour-network flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/friends') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleNav('/friends')} className={`tour-network flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/friends') ? 'font-medium text-white glass-card' : 'font-light text-white/50 hover:text-white hover:bg-brand-graphite/20'}`}>
             <Users size={18} strokeWidth={2} />
             Network
           </button>
-          <button onClick={() => handleNav('/groups')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/groups') || location.pathname.startsWith('/group/') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`}>
+          <button onClick={() => handleNav('/groups')} className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/groups') || location.pathname.startsWith('/group/') ? 'font-medium text-white glass-card' : 'font-light text-white/50 hover:text-white hover:bg-brand-graphite/20'}`}>
             <Users size={18} strokeWidth={2} />
             Groups
           </button>
-          <button className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/history') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`} onClick={() => handleNav('/history')}>
+          <button className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/history') ? 'font-medium text-white glass-card' : 'font-light text-white/50 hover:text-white hover:bg-brand-graphite/20'}`} onClick={() => handleNav('/history')}>
             <History size={18} strokeWidth={2} />
             History
           </button>
         
-          <div className="h-px bg-white/5 my-4 mx-4"></div>
+          <div className="h-px bg-border/40 my-4 mx-4"></div>
         
-          <button className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/profile') ? 'font-medium text-white bg-white/10' : 'font-light text-white/50 hover:text-white hover:bg-white/5'}`} onClick={() => handleNav('/profile')}>
+          <button className={`flex items-center gap-4 px-4 py-3 rounded-full text-sm transition-all text-left ${isActive('/profile') ? 'font-medium text-white glass-card' : 'font-light text-white/50 hover:text-white hover:bg-brand-graphite/20'}`} onClick={() => handleNav('/profile')}>
             <Settings size={18} strokeWidth={2} />
             Profile
           </button>
         </nav>
-
-        <div className="p-6 border-t border-white/10">
-          <div className="flex items-center gap-4 p-4 hover:bg-white/5 rounded-2xl cursor-pointer transition-all" onClick={handleAuthAction}>
-            <div className="w-10 h-10 border border-white/10 rounded-full flex items-center justify-center shrink-0 text-white overflow-hidden bg-white/5">
+ 
+        <div className="p-6 border-t border-border">
+          <div className="flex items-center gap-4 p-4 hover:bg-brand-graphite/20 rounded-2xl cursor-pointer transition-all" onClick={handleAuthAction}>
+            <div className="w-10 h-10 border border-border rounded-full flex items-center justify-center shrink-0 text-white overflow-hidden bg-brand-graphite/20">
               {user ? (
                 user.user_metadata?.avatar_url ? (
                   <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />

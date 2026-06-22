@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   darkMode: ["class"],
   content: [
     './pages/**/*.{js,jsx}',
@@ -17,6 +17,13 @@ module.exports = {
     },
     extend: {
       colors: {
+        brand: {
+          porcelain: "#FFFFFA",
+          charcoal: "#515052",
+          black: "#000103",
+          graphite: "#333138",
+          cinnabar: "#FF312E",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

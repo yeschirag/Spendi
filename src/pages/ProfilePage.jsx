@@ -1,7 +1,6 @@
-import React from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Shield, Settings, Info, CreditCard } from 'lucide-react';
+import { User, Settings, Info } from 'lucide-react';
 
 export const ProfilePage = () => {
   const { user } = useAppContext() || { user: null };
@@ -27,8 +26,8 @@ export const ProfilePage = () => {
 
       <div className="max-w-4xl mx-auto w-full flex flex-col gap-12">
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-center md:items-end gap-8 border-b border-white/10 pb-12">
-        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border border-white/10 overflow-hidden bg-white/5 flex items-center justify-center shrink-0 shadow-2xl">
+        <div className="flex flex-col md:flex-row items-center md:items-end gap-8 border-b border-border pb-12">
+        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full border border-border overflow-hidden bg-brand-graphite/20 flex items-center justify-center shrink-0 shadow-2xl">
           {avatarUrl ? (
             <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
           ) : (
@@ -51,43 +50,51 @@ export const ProfilePage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         
         {/* Account Details */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors">
+        <div className="bg-brand-graphite/20 border border-border rounded-3xl p-8 hover:bg-brand-graphite/30 transition-colors">
           <div className="flex items-center gap-4 mb-6">
             <User size={24} className="text-white/50" />
             <h2 className="text-2xl text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Account.</h2>
           </div>
           <div className="space-y-4 font-light text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
-            <div className="flex justify-between border-b border-white/5 pb-4">
+            <div className="flex justify-between border-b border-border/40 pb-4">
               <span className="text-white/50">Provider</span>
               <span className="text-white capitalize">{user?.app_metadata?.provider || 'Email'}</span>
             </div>
-            <div className="flex justify-between border-b border-white/5 pb-4">
+            <div className="flex justify-between border-b border-border/40 pb-4">
               <span className="text-white/50">Status</span>
-              <span className="text-green-400">Active</span>
+              <span className="text-brand-porcelain font-semibold">Active</span>
             </div>
             <div className="flex justify-between pt-2">
               <span className="text-white/50">Last Sign In</span>
               <span className="text-white">{new Date(user?.last_sign_in_at).toLocaleDateString()}</span>
             </div>
+            <div className="pt-4 border-t border-border/40 mt-4 flex justify-end">
+              <button 
+                onClick={logout}
+                className="px-6 py-2.5 rounded-full text-xs uppercase tracking-widest font-semibold border border-brand-cinnabar/30 bg-brand-cinnabar/10 text-brand-cinnabar hover:bg-brand-cinnabar/25 hover:scale-[1.02] transition-all"
+              >
+                Log Out
+              </button>
+            </div>
           </div>
         </div>
 
         {/* Preferences */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors">
+        <div className="bg-brand-graphite/20 border border-border rounded-3xl p-8 hover:bg-brand-graphite/30 transition-colors">
           <div className="flex items-center gap-4 mb-6">
             <Settings size={24} className="text-white/50" />
             <h2 className="text-2xl text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Preferences.</h2>
           </div>
           <div className="space-y-4 font-light text-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
-            <div className="flex justify-between border-b border-white/5 pb-4">
+            <div className="flex justify-between border-b border-border/40 pb-4">
               <span className="text-white/50">Currency</span>
               <span className="text-white">INR (₹)</span>
             </div>
-            <div className="flex justify-between border-b border-white/5 pb-4">
+            <div className="flex justify-between border-b border-border/40 pb-4">
               <span className="text-white/50">Theme</span>
               <span className="text-white">Luxury Dark</span>
             </div>
-            <div className="flex justify-between border-b border-white/5 pb-4">
+            <div className="flex justify-between border-b border-border/40 pb-4">
               <span className="text-white/50">Notifications</span>
               <span className="text-white">Enabled</span>
             </div>
@@ -107,7 +114,7 @@ export const ProfilePage = () => {
         </div>
 
         {/* About App */}
-        <div className="bg-white/5 border border-white/10 rounded-3xl p-8 hover:bg-white/10 transition-colors md:col-span-2">
+        <div className="bg-brand-graphite/20 border border-border rounded-3xl p-8 hover:bg-brand-graphite/30 transition-colors md:col-span-2">
           <div className="flex items-center gap-4 mb-6">
             <Info size={24} className="text-white/50" />
             <h2 className="text-2xl text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>About Spendi.</h2>

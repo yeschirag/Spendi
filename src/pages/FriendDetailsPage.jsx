@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useFriends } from '../context/FriendContext';
 import { useAppContext } from '../context/AppContext';
@@ -53,7 +53,7 @@ export const FriendDetailsPage = () => {
 
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-8 mb-16">
         <div className="flex items-center gap-6">
-          <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-white/10 border border-white/10 flex items-center justify-center overflow-hidden shrink-0 shadow-2xl">
+          <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-brand-graphite/20 border border-border flex items-center justify-center overflow-hidden shrink-0 shadow-2xl">
             {friend.avatar_url ? (
               <img src={friend.avatar_url} alt={friendName} className="w-full h-full object-cover" />
             ) : (
@@ -70,16 +70,16 @@ export const FriendDetailsPage = () => {
           </div>
         </div>
 
-        <div className="p-6 rounded-3xl bg-white/5 border border-white/10 flex-shrink-0 w-full md:w-auto text-center md:text-right">
+        <div className="p-6 rounded-3xl bg-brand-graphite/20 border border-border flex-shrink-0 w-full md:w-auto text-center md:text-right">
           <p className="text-xs text-white/40 uppercase tracking-widest font-medium mb-2">Net Balance</p>
           {isSettled ? (
             <p className="text-2xl text-white/50 font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>Settled Up</p>
           ) : youOwe > 0 ? (
-            <p className="text-3xl text-red-400 font-normal tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <p className="text-3xl text-brand-cinnabar font-semibold tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
               You owe ₹{youOwe.toFixed(2)}
             </p>
           ) : (
-            <p className="text-3xl text-green-400 font-normal tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            <p className="text-3xl text-brand-porcelain font-semibold tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>
               Owes you ₹{owesYou.toFixed(2)}
             </p>
           )}
@@ -92,16 +92,16 @@ export const FriendDetailsPage = () => {
         </h2>
         
         {mutualExpenses.length === 0 ? (
-          <div className="text-center py-20 border border-white/5 rounded-3xl bg-white/5">
+          <div className="text-center py-20 border border-border rounded-3xl bg-brand-graphite/20">
             <Receipt size={40} className="mx-auto text-white/20 mb-4" />
             <p className="text-white/40 font-light tracking-wide">No mutual expenses found.</p>
           </div>
         ) : (
           <div className="flex flex-col gap-4">
             {mutualExpenses.map((expense) => (
-              <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="group flex items-center justify-between p-6 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all cursor-pointer">
+              <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="group flex items-center justify-between p-6 rounded-3xl bg-brand-graphite/25 border border-border/40 hover:border-border hover:bg-brand-graphite/45 transition-all cursor-pointer">
                 <div className="flex items-center gap-6 flex-1 min-w-0">
-                  <div className="w-12 h-12 shrink-0 rounded-2xl bg-white/10 flex items-center justify-center border border-white/10">
+                  <div className="w-12 h-12 shrink-0 rounded-2xl bg-brand-graphite/30 flex items-center justify-center border border-border">
                     <CategoryIcon slug={expense.category} className="text-white/80 w-6 h-6" />
                   </div>
                   <div className="flex-1 min-w-0">

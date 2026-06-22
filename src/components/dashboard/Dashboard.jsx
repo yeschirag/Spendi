@@ -67,8 +67,8 @@ export const Dashboard = () => {
       {
         data: categoryData.length ? categoryData : [1],
         backgroundColor: categoryData.length ? [
-          '#ffffff', '#cccccc', '#999999', '#666666', '#333333', '#111111'
-        ] : ['#111111'],
+          '#FFFFFA', '#FF312E', '#515052', '#333138', '#000103'
+        ] : ['#333138'],
         borderWidth: 0,
       },
     ],
@@ -106,7 +106,7 @@ export const Dashboard = () => {
       {
         label: 'Spending',
         data: weeklyData,
-        backgroundColor: '#ffffff',
+        backgroundColor: '#FFFFFA',
         borderRadius: 0,
       }
     ]
@@ -120,7 +120,7 @@ export const Dashboard = () => {
     },
     scales: {
       x: { grid: { display: false }, border: { display: false } },
-      y: { grid: { color: 'rgba(255,255,255,0.05)' }, border: { display: false }, ticks: { display: false } }
+      y: { grid: { color: 'rgba(255,255,250,0.04)' }, border: { display: false }, ticks: { display: false } }
     }
   };
 
@@ -182,26 +182,26 @@ export const Dashboard = () => {
 
       {/* Dashboard Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 mt-4 md:mt-8">
-        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8 group">
+        <div className="glass-card p-5 md:p-8 group">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Spending Overview.</h3>
-            <span className="flex items-center gap-1.5 px-3 py-1 bg-white/10 text-white/70 rounded-full text-xs font-medium tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>This Month</span>
+            <span className="flex items-center gap-1.5 px-3 py-1 bg-brand-graphite/40 text-white/70 rounded-full text-xs font-medium tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>This Month</span>
           </div>
           <div className="relative h-[240px] flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
             <Bar data={barData} options={chartOptions} />
           </div>
         </div>
         
-        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8 group">
+        <div className="glass-card p-5 md:p-8 group">
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>By Category.</h3>
           </div>
           <div className="relative h-[240px] flex items-center justify-center opacity-80 group-hover:opacity-100 transition-opacity duration-500">
             {categoryData.length > 0 ? (
-              <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'rgba(255,255,255,0.7)', font: { family: "'Inter', sans-serif" } } } }, cutout: '80%' }} />
+              <Doughnut data={doughnutData} options={{ responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: 'rgba(255,255,250,0.7)', font: { family: "'Inter', sans-serif" } } } }, cutout: '80%' }} />
             ) : (
               <div className="py-12 text-center w-full">
-                <p className="text-sm text-white/40 tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>No expenses to chart</p>
+                <p className="text-sm text-white/45 tracking-wide uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>No expenses to chart</p>
               </div>
             )}
           </div>
@@ -210,7 +210,7 @@ export const Dashboard = () => {
 
       {/* Cards Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-12 mt-6 md:mt-12">
-        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8">
+        <div className="glass-card p-5 md:p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Friend Balances.</h2>
             <button className="text-xs uppercase tracking-wider font-medium text-white/40 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }} onClick={() => navigate('/friends')}>Manage</button>
@@ -230,16 +230,16 @@ export const Dashboard = () => {
               ) : (
                 <>
                   {owesYouList.map((item) => (
-                    <div key={`owes-${item.name}`} className="flex items-center justify-between py-4 border-b border-white/10 group cursor-pointer" onClick={() => navigate('/friends')}>
-                      <span className="font-light text-green-400/80 group-hover:text-green-400 transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <div key={`owes-${item.name}`} className="flex items-center justify-between py-4 border-b border-border/40 group cursor-pointer" onClick={() => navigate('/friends')}>
+                      <span className="font-medium text-brand-porcelain group-hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {item.name} owes you
                       </span>
                       <span className="text-2xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{item.amount.toFixed(2)}</span>
                     </div>
                   ))}
                   {youOweList.map((item) => (
-                    <div key={`owe-${item.name}`} className="flex items-center justify-between py-4 border-b border-white/10 group cursor-pointer" onClick={() => navigate('/friends')}>
-                      <span className="font-light text-red-400/80 group-hover:text-red-400 transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <div key={`owe-${item.name}`} className="flex items-center justify-between py-4 border-b border-border/40 group cursor-pointer" onClick={() => navigate('/friends')}>
+                      <span className="font-medium text-brand-cinnabar group-hover:text-[#ff4e4c] transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
                         You owe {item.name}
                       </span>
                       <span className="text-2xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{item.amount.toFixed(2)}</span>
@@ -251,7 +251,7 @@ export const Dashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white/5 border border-white/10 rounded-2xl md:rounded-3xl p-5 md:p-8">
+        <div className="glass-card p-5 md:p-8">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-normal text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Recent Expenses.</h2>
             <button className="text-xs uppercase tracking-wider font-medium text-white/40 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }} onClick={() => navigate('/history')}>View All</button>
@@ -266,9 +266,9 @@ export const Dashboard = () => {
               ) : (
                 expenses.slice(0, 10).map((expense) => {
                   return (
-                    <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 mb-3 rounded-2xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer shadow-lg w-full max-w-full overflow-hidden">
+                    <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 mb-3 glass-card hover:border-brand-porcelain/20 transition-all duration-300 cursor-pointer shadow-lg w-full max-w-full overflow-hidden">
                       <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0 md:pr-8 w-full">
-                        <div className="hidden sm:flex w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-xl bg-gradient-to-br from-white/10 to-white/5 items-center justify-center border border-white/10 shadow-inner">
+                        <div className="hidden sm:flex w-12 h-12 md:w-14 md:h-14 shrink-0 rounded-xl bg-gradient-to-br from-brand-graphite/40 to-brand-graphite/10 items-center justify-center border border-border shadow-inner">
                           <CategoryIcon slug={expense.category} className="text-white/80 w-5 h-5 md:w-6 md:h-6" />
                         </div>
                         <div className="flex-1 min-w-0 w-full">
@@ -286,7 +286,7 @@ export const Dashboard = () => {
                         <div className="text-2xl md:text-3xl text-white font-normal truncate" style={{ fontFamily: "'Instrument Serif', serif" }}>₹{expense.amount.toFixed(0)}</div>
                         <button 
                           onClick={(e) => { e.stopPropagation(); navigate(`/edit-expense/${expense.id}`); }} 
-                          className="md:opacity-0 group-hover:opacity-100 transition-all duration-300 p-2 md:p-2.5 bg-white/5 hover:bg-white/20 rounded-full text-white/70 hover:text-white border border-white/10 shrink-0"
+                          className="md:opacity-0 group-hover:opacity-100 transition-all duration-300 p-2 md:p-2.5 bg-brand-graphite/30 hover:bg-brand-graphite/60 border border-border shrink-0"
                           title="Edit Expense"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>

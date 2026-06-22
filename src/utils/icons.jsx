@@ -1,4 +1,3 @@
-import React from 'react';
 import { UtensilsCrossed, Car, ShoppingBag, Film, Zap, Home, Heart, GraduationCap, Plane, CreditCard, MoreHorizontal } from 'lucide-react';
 
 export const CategoryIcon = ({ slug, size = 24, className = "" }) => {

@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Trash2, Edit2 } from 'lucide-react';
 
 export const EditExpensePage = () => {
-  const { expenses, friends, editExpense, removeExpense } = useAppContext();
+  const { expenses, friends, groups, user, editExpense, removeExpense } = useAppContext();
   const navigate = useNavigate();
   const { id } = useParams();
+
+  const expense = expenses.find(e => e.id === id);
+  const groupId = expense?.group_id || null;
+  const selectedGroup = groups.find(g => g.id === groupId);
+  const availableFriends = selectedGroup 
+    ? selectedGroup.group_members
+        .filter(m => m.user_id !== user?.id)
+        .map(m => m.profiles?.display_name || m.profiles?.full_name || m.profiles?.email || 'Unknown')
+    : friends;
   
   const [isEditing, setIsEditing] = useState(false);
   const [title, setTitle] = useState('');
@@ -117,7 +126,8 @@ export const EditExpensePage = () => {
       paidBy,
       splitWith,
       splitType: splitType === 'equal' ? 'equal' : 'exact',
-      splitsData: finalSplitsData
+      splitsData: finalSplitsData,
+      groupId: groupId
     });
     
     setIsEditing(false);
@@ -144,7 +154,7 @@ export const EditExpensePage = () => {
         </button>
         <button 
           onClick={handleDelete}
-          className="flex items-center gap-2 text-red-500/70 hover:text-red-500 transition-colors text-sm uppercase tracking-widest font-medium"
+          className="flex items-center gap-2 text-brand-cinnabar/80 hover:text-brand-cinnabar transition-colors text-sm uppercase tracking-widest font-medium"
           style={{ fontFamily: "'Inter', sans-serif" }}
         >
           <Trash2 size={16} />
@@ -171,7 +181,7 @@ export const EditExpensePage = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g., Dinner at the space station"
-              className={`w-full bg-transparent border-b pb-4 text-3xl text-white placeholder-white/20 focus:outline-none transition-colors ${isEditing ? 'border-white/20 focus:border-white' : 'border-transparent cursor-default'}`}
+              className={`w-full bg-transparent border-b pb-4 text-3xl text-white placeholder-white/20 focus:outline-none transition-colors ${isEditing ? 'border-border focus:border-brand-porcelain' : 'border-transparent cursor-default'}`}
               style={{ fontFamily: "'Instrument Serif', serif" }}
               readOnly={!isEditing}
               autoFocus={isEditing}
@@ -189,7 +199,7 @@ export const EditExpensePage = () => {
                 placeholder="0.00"
                 step="0.01"
                 min="0"
-                className={`w-full bg-transparent border-b pb-4 pl-8 text-3xl text-white placeholder-white/20 focus:outline-none transition-colors ${isEditing ? 'border-white/20 focus:border-white' : 'border-transparent cursor-default'}`}
+                className={`w-full bg-transparent border-b pb-4 pl-8 text-3xl text-white placeholder-white/20 focus:outline-none transition-colors ${isEditing ? 'border-border focus:border-brand-porcelain' : 'border-transparent cursor-default'}`}
                 style={{ fontFamily: "'Instrument Serif', serif" }}
                 readOnly={!isEditing}
               />
@@ -203,7 +213,7 @@ export const EditExpensePage = () => {
                 type="date" 
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className={`w-full bg-transparent border-b pb-4 text-xl text-white focus:outline-none transition-colors ${isEditing ? 'border-white/20 focus:border-white' : 'border-transparent cursor-default'}`}
+                className={`w-full bg-transparent border-b pb-4 text-xl text-white focus:outline-none transition-colors ${isEditing ? 'border-border focus:border-brand-porcelain' : 'border-transparent cursor-default'}`}
                 style={{ fontFamily: "'Inter', sans-serif", colorScheme: "dark" }}
                 readOnly={!isEditing}
               />
@@ -214,16 +224,16 @@ export const EditExpensePage = () => {
               <select 
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className={`w-full bg-transparent border-b pb-4 text-xl text-white focus:outline-none transition-colors appearance-none ${isEditing ? 'border-white/20 focus:border-white cursor-pointer' : 'border-transparent cursor-default pointer-events-none'}`}
+                className={`w-full bg-transparent border-b pb-4 text-xl text-white focus:outline-none transition-colors appearance-none ${isEditing ? 'border-border focus:border-brand-porcelain cursor-pointer' : 'border-transparent cursor-default pointer-events-none'}`}
                 style={{ fontFamily: "'Inter', sans-serif" }}
                 disabled={!isEditing}
               >
-                <option value="food" className="bg-black text-white">Food & Drinks</option>
-                <option value="transport" className="bg-black text-white">Transport</option>
-                <option value="shopping" className="bg-black text-white">Shopping</option>
-                <option value="entertainment" className="bg-black text-white">Entertainment</option>
-                <option value="bills" className="bg-black text-white">Bills & Utilities</option>
-                <option value="other" className="bg-black text-white">Other</option>
+                <option value="food" className="bg-brand-black text-white">Food & Drinks</option>
+                <option value="transport" className="bg-brand-black text-white">Transport</option>
+                <option value="shopping" className="bg-brand-black text-white">Shopping</option>
+                <option value="entertainment" className="bg-brand-black text-white">Entertainment</option>
+                <option value="bills" className="bg-brand-black text-white">Bills & Utilities</option>
+                <option value="other" className="bg-brand-black text-white">Other</option>
               </select>
             </div>
           </div>
@@ -233,34 +243,34 @@ export const EditExpensePage = () => {
             <select 
               value={paidBy}
               onChange={(e) => setPaidBy(e.target.value)}
-              className={`w-full bg-transparent border-b pb-4 text-xl text-white focus:outline-none transition-colors appearance-none ${isEditing ? 'border-white/20 focus:border-white cursor-pointer' : 'border-transparent cursor-default pointer-events-none'}`}
+              className={`w-full bg-transparent border-b pb-4 text-xl text-white focus:outline-none transition-colors appearance-none ${isEditing ? 'border-border focus:border-brand-porcelain cursor-pointer' : 'border-transparent cursor-default pointer-events-none'}`}
               style={{ fontFamily: "'Inter', sans-serif" }}
               disabled={!isEditing}
             >
-              <option value="You" className="bg-black text-white">You</option>
-              {friends.map(friend => <option key={friend} value={friend} className="bg-black text-white">{friend}</option>)}
+              <option value="You" className="bg-brand-black text-white">You</option>
+              {availableFriends.map(friend => <option key={friend} value={friend} className="bg-brand-black text-white">{friend}</option>)}
             </select>
           </div>
 
-          <div className="flex flex-col gap-4 border-t border-white/5 pt-6 mt-4">
+          <div className="flex flex-col gap-4 border-t border-border/45 pt-6 mt-4">
             <label className="text-sm font-light text-white/50 tracking-wide uppercase">Split Method</label>
-            <div className={`flex gap-4 p-2 rounded-2xl border transition-colors ${isEditing ? 'bg-black/50 border-white/5' : 'bg-transparent border-transparent'}`}>
-              <button type="button" disabled={!isEditing} onClick={() => setSplitType('equal')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'equal' ? (isEditing ? 'bg-white text-black' : 'text-white') : 'text-white/50 hover:text-white disabled:hover:text-white/50'}`}>Equal</button>
-              <button type="button" disabled={!isEditing} onClick={() => setSplitType('percentage')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'percentage' ? (isEditing ? 'bg-white text-black' : 'text-white') : 'text-white/50 hover:text-white disabled:hover:text-white/50'}`}>Percentage</button>
-              <button type="button" disabled={!isEditing} onClick={() => setSplitType('exact')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'exact' ? (isEditing ? 'bg-white text-black' : 'text-white') : 'text-white/50 hover:text-white disabled:hover:text-white/50'}`}>Exact Amount</button>
+            <div className={`flex gap-4 p-2 rounded-2xl border transition-colors ${isEditing ? 'bg-brand-black/50 border-border/45' : 'bg-transparent border-transparent'}`}>
+              <button type="button" disabled={!isEditing} onClick={() => setSplitType('equal')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'equal' ? (isEditing ? 'bg-brand-porcelain text-brand-black' : 'text-white') : 'text-white/50 hover:text-white disabled:hover:text-white/50'}`}>Equal</button>
+              <button type="button" disabled={!isEditing} onClick={() => setSplitType('percentage')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'percentage' ? (isEditing ? 'bg-brand-porcelain text-brand-black' : 'text-white') : 'text-white/50 hover:text-white disabled:hover:text-white/50'}`}>Percentage</button>
+              <button type="button" disabled={!isEditing} onClick={() => setSplitType('exact')} className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${splitType === 'exact' ? (isEditing ? 'bg-brand-porcelain text-brand-black' : 'text-white') : 'text-white/50 hover:text-white disabled:hover:text-white/50'}`}>Exact Amount</button>
             </div>
           </div>
 
           <div className="group mt-4">
             <label className="block text-xs font-medium text-white/40 uppercase tracking-widest mb-4 transition-colors group-focus-within:text-white/70" style={{ fontFamily: "'Inter', sans-serif" }}>Participants</label>
             <div className="flex flex-col gap-3">
-              {['You', ...friends].map(person => {
+              {['You', ...availableFriends].map(person => {
                 const isSelected = splitWith.includes(person);
                 return (
-                  <div key={person} className={`flex items-center justify-between gap-4 p-4 rounded-2xl border transition-all ${isSelected ? (isEditing ? 'bg-white/10 border-white/20' : 'bg-transparent border-white/10') : 'hidden'}`}>
+                  <div key={person} className={`flex items-center justify-between gap-4 p-4 rounded-2xl border transition-all ${isSelected ? (isEditing ? 'bg-brand-graphite/20 border-border' : 'bg-transparent border-border/40') : 'hidden'}`}>
                     <label className={`flex items-center gap-4 flex-1 ${isEditing ? 'cursor-pointer' : 'cursor-default'}`}>
                       {isEditing && (
-                        <div className={`w-5 h-5 shrink-0 rounded-sm flex items-center justify-center border transition-colors ${isSelected ? 'bg-white border-white text-black' : 'bg-transparent border-white/30 text-transparent'}`}>
+                        <div className={`w-5 h-5 shrink-0 rounded-sm flex items-center justify-center border transition-colors ${isSelected ? 'bg-brand-porcelain border-brand-porcelain text-brand-black' : 'bg-transparent border-border text-transparent'}`}>
                           <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="2.5 7 5.5 10 11.5 3"></polyline></svg>
                         </div>
                       )}
@@ -276,7 +286,7 @@ export const EditExpensePage = () => {
                           min="0"
                           value={splitsData[person] || ''} 
                           onChange={(e) => handleSplitDataChange(person, e.target.value)}
-                          className={`w-24 bg-black border rounded-lg px-3 py-2 text-right text-white focus:outline-none transition-colors ${isEditing ? 'border-white/20 focus:border-white' : 'border-transparent'}`}
+                          className={`w-24 bg-brand-black border rounded-lg px-3 py-2 text-right text-white focus:outline-none transition-colors ${isEditing ? 'border-border focus:border-brand-porcelain' : 'border-transparent'}`}
                           placeholder="0.00"
                           disabled={!isEditing}
                         />
@@ -291,10 +301,10 @@ export const EditExpensePage = () => {
               })}
               
               {/* If editing, show unselected friends so they can be added */}
-              {isEditing && ['You', ...friends].filter(f => !splitWith.includes(f)).map(person => (
-                <div key={person} className="flex items-center justify-between gap-4 p-4 rounded-2xl border transition-all bg-transparent border-white/5">
+              {isEditing && ['You', ...availableFriends].filter(f => !splitWith.includes(f)).map(person => (
+                <div key={person} className="flex items-center justify-between gap-4 p-4 rounded-2xl border transition-all bg-transparent border-border/30">
                   <label className="flex items-center gap-4 cursor-pointer flex-1">
-                    <div className="w-5 h-5 shrink-0 rounded-sm flex items-center justify-center border transition-colors bg-transparent border-white/30 text-transparent">
+                    <div className="w-5 h-5 shrink-0 rounded-sm flex items-center justify-center border transition-colors bg-transparent border-border text-transparent">
                       <svg viewBox="0 0 14 14" fill="none" className="w-3.5 h-3.5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="2.5 7 5.5 10 11.5 3"></polyline></svg>
                     </div>
                     <input type="checkbox" value={person} checked={false} onChange={() => handleSplitWithChange(person)} className="sr-only" />
@@ -305,7 +315,7 @@ export const EditExpensePage = () => {
             </div>
 
             {isEditing && splitType !== 'equal' && splitWith.length > 0 && (
-              <div className={`mt-2 text-sm font-medium p-4 rounded-xl border ${isValidForm() ? 'bg-green-500/10 border-green-500/20 text-green-400' : 'bg-red-500/10 border-red-500/20 text-red-400'}`}>
+              <div className={`mt-2 text-sm font-medium p-4 rounded-xl border ${isValidForm() ? 'bg-brand-porcelain/10 border-border/60 text-brand-porcelain' : 'bg-brand-cinnabar/10 border-brand-cinnabar/20 text-brand-cinnabar'}`}>
                 {splitType === 'percentage' 
                   ? `Total: ${getSplitTotal().toFixed(2)}% ${!isValidForm() ? '(Must equal 100%)' : '✓'}`
                   : `Total: ₹${getSplitTotal().toFixed(2)} / ₹${amount || '0.00'} ${!isValidForm() ? '(Must match total)' : '✓'}`
@@ -319,7 +329,7 @@ export const EditExpensePage = () => {
               <button 
                 type="submit"
                 disabled={!isValidForm()}
-                className="bg-white text-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-[0_0_40px_rgba(255,255,255,0.3)] disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
+                className="bg-brand-porcelain text-brand-black px-10 py-4 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-xl disabled:opacity-50 disabled:hover:scale-100 flex items-center gap-2"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 Save Changes
@@ -331,7 +341,7 @@ export const EditExpensePage = () => {
                   e.preventDefault();
                   setIsEditing(true);
                 }}
-                className="bg-white/10 text-white px-10 py-4 rounded-full text-sm font-medium hover:bg-white/20 transition-colors flex items-center gap-2"
+                className="bg-brand-graphite/40 border border-border text-white px-10 py-4 rounded-full text-sm font-medium hover:bg-brand-graphite/80 transition-colors flex items-center gap-2"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 <Edit2 size={16} />

@@ -4,17 +4,19 @@
 
 @layer base {
   :root {
-    --background: 0 0% 0%;
-    --foreground: 0 0% 100%;
-    --muted-foreground: 240 4% 66%;
-    --primary: 0 0% 100%;
-    --primary-foreground: 0 0% 4%;
-    --secondary: 0 0% 10%;
-    --muted: 0 0% 10%;
-    --accent: 0 0% 10%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 100%;
+    --background: 220 100% 1%; /* Brand Black #000103 */
+    --foreground: 60 100% 99%; /* Brand Porcelain #FFFFFA */
+    --muted-foreground: 270 1% 65%; /* Charcoal lightened slightly */
+    --primary: 60 100% 99%; /* Brand Porcelain #FFFFFA */
+    --primary-foreground: 220 100% 1%; /* Brand Black #000103 */
+    --secondary: 257 7% 21%; /* Brand Graphite #333138 */
+    --secondary-foreground: 60 100% 99%; /* Brand Porcelain #FFFFFA */
+    --muted: 270 1% 32%; /* Brand Charcoal #515052 */
+    --accent: 1 100% 59%; /* Brand Cinnabar #FF312E */
+    --accent-foreground: 60 100% 99%; /* Brand Porcelain #FFFFFA */
+    --border: 257 7% 21%; /* Brand Graphite #333138 */
+    --input: 257 7% 21%; /* Brand Graphite #333138 */
+    --ring: 1 100% 59%; /* Brand Cinnabar #FF312E */
     --radius: 0.5rem;
     --font-display: 'Instrument Serif', serif;
     --font-body: 'Inter', sans-serif;
@@ -35,6 +37,16 @@
 }
 
 @layer utilities {
+  .glass-card {
+    background: rgba(51, 50, 52, 0.35); /* Brand Charcoal/Graphite mix */
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 250, 0.08); /* Porcelain border tint */
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.15),
+      0 8px 32px 0 rgba(0, 1, 3, 0.37);
+  }
+
   .liquid-glass {
     background: rgba(255, 255, 255, 0.01);
     background-blend-mode: luminosity;
@@ -63,11 +75,11 @@
   }
 
   .mesh-bg {
-    background-color: #000c14;
+    background-color: #000103;
     background-image: 
-      radial-gradient(at 0% 0%, hsla(201,100%,15%,1) 0, transparent 50%), 
-      radial-gradient(at 50% 0%, hsla(205,100%,12%,1) 0, transparent 50%), 
-      radial-gradient(at 100% 0%, hsla(210,100%,10%,1) 0, transparent 50%);
+      radial-gradient(at 0% 0%, hsla(257,7%,21%,0.4) 0, transparent 60%), 
+      radial-gradient(at 50% 0%, hsla(1,100%,59%,0.08) 0, transparent 50%), 
+      radial-gradient(at 100% 0%, hsla(270,1%,32%,0.3) 0, transparent 60%);
     background-size: 200% 200%;
     animation: gradientMove 15s ease infinite alternate;
   }

@@ -73,13 +73,13 @@ export const addExpense = async (expenseData) => {
 
   const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {}, groupId = null } = expenseData;
 
-  let categoryId = null;
+  let categoryId;
   const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).limit(1).maybeSingle();
   if (catData) {
     categoryId = catData.id;
   } else {
     const { data: otherCat } = await supabase.from('categories').select('id').eq('slug', 'other').maybeSingle();
-    categoryId = otherCat?.id;
+    categoryId = otherCat?.id || null;
   }
 
   const { data: expense, error: expError } = await supabase
@@ -154,13 +154,13 @@ export const updateExpense = async (id, updates) => {
 
   const { title, amount, date, category, paidBy, splitWith, splitType = 'equal', splitsData = {}, groupId = null } = updates;
 
-  let categoryId = null;
+  let categoryId;
   const { data: catData } = await supabase.from('categories').select('id').eq('slug', category).limit(1).maybeSingle();
   if (catData) {
     categoryId = catData.id;
   } else {
     const { data: otherCat } = await supabase.from('categories').select('id').eq('slug', 'other').maybeSingle();
-    categoryId = otherCat?.id;
+    categoryId = otherCat?.id || null;
   }
 
   const { data: expense, error: expError } = await supabase

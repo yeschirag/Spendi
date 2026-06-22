@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
-import { ArrowLeft, Users, Link as LinkIcon, Settings, Copy, Check, Plus } from 'lucide-react';
+import { ArrowLeft, Users, Link as LinkIcon, Check, Plus } from 'lucide-react';
 import * as db from '../services/db';
 
 export const GroupDetailsPage = () => {
@@ -49,7 +49,7 @@ export const GroupDetailsPage = () => {
     const balances = {};
     const members = {};
     group.group_members.forEach(m => {
-      members[m.user_id] = m.profiles.display_name || m.profiles.full_name || m.profiles.email.split('@')[0];
+      members[m.user_id] = m.profiles?.display_name || m.profiles?.full_name || m.profiles?.email?.split('@')[0] || 'Unknown';
     });
 
     expenses.forEach(exp => {
@@ -110,9 +110,9 @@ export const GroupDetailsPage = () => {
           <ArrowLeft size={16} /> Back
       </button>
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-16 gap-6 border-b border-white/5 pb-12">
-        <div className="flex items-center gap-6">
-          <div className="w-24 h-24 rounded-full bg-white/5 flex items-center justify-center shrink-0">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-12 md:mb-16 gap-6 border-b border-border/45 pb-12">
+        <div className="hidden md:flex items-center gap-6">
+          <div className="w-24 h-24 rounded-full bg-brand-graphite/20 flex items-center justify-center shrink-0">
             <Users size={32} className="text-white/50" />
           </div>
           <div>
@@ -124,15 +124,22 @@ export const GroupDetailsPage = () => {
             </p>
           </div>
         </div>
+
+        {/* Mobile Description */}
+        <div className="md:hidden w-full">
+          <p className="text-white/50 text-base font-light mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {group.description || 'No description provided'}
+          </p>
+        </div>
         
-        <div className="flex flex-wrap gap-4">
-          <button onClick={() => navigate(`/add-expense?group=${group.id}`)} className="flex items-center gap-2 bg-white text-black hover:scale-[1.02] px-5 py-2.5 rounded-full transition-all text-sm font-medium">
+        <div className="flex flex-wrap gap-4 w-full md:w-auto">
+          <button onClick={() => navigate(`/add-expense?group=${group.id}`)} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-brand-porcelain text-brand-black hover:scale-[1.02] px-5 py-2.5 rounded-full transition-all text-sm font-medium">
             <Plus size={16} strokeWidth={2.5} />
             Add Expense
           </button>
-          <button onClick={handleInvite} className="flex items-center gap-2 bg-white/5 hover:bg-white/10 text-white px-5 py-2.5 rounded-full border border-white/10 transition-all text-sm">
-            {copied ? <Check size={16} className="text-green-400" /> : <LinkIcon size={16} />}
-            {copied ? 'Link Copied!' : 'Invite Link'}
+          <button onClick={handleInvite} className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-brand-graphite/20 hover:bg-brand-graphite/40 text-white px-5 py-2.5 rounded-full border border-border transition-all text-sm">
+            {copied ? <Check size={16} className="text-brand-porcelain" /> : <LinkIcon size={16} />}
+            {copied ? 'Link Copied!' : 'Invite'}
           </button>
         </div>
       </div>
@@ -142,7 +149,7 @@ export const GroupDetailsPage = () => {
         <div className="lg:col-span-2 space-y-8">
           <h2 className="text-3xl text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Group Expenses</h2>
           
-          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-8">
+          <div className="bg-brand-graphite/20 border border-border rounded-[2rem] p-8">
             <div className="text-5xl text-white mb-2" style={{ fontFamily: "'Instrument Serif', serif" }}>
               ₹{totalSpent.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </div>
@@ -153,7 +160,7 @@ export const GroupDetailsPage = () => {
                 <div className="text-center py-12 text-white/40">No expenses in this group yet.</div>
               ) : (
                 expenses.map(exp => (
-                  <div key={exp.id} className="flex items-center justify-between p-4 bg-black/20 rounded-2xl border border-white/5">
+                  <div key={exp.id} className="flex items-center justify-between p-4 bg-brand-black/20 rounded-2xl border border-border/40">
                     <div className="flex flex-col">
                       <span className="text-white text-lg">{exp.title}</span>
                       <span className="text-white/40 text-sm">{new Date(exp.date).toLocaleDateString()} • {exp.category.name}</span>
@@ -172,16 +179,16 @@ export const GroupDetailsPage = () => {
         <div className="space-y-8">
           <h2 className="text-3xl text-white" style={{ fontFamily: "'Instrument Serif', serif" }}>Balances</h2>
           
-          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-4">
+          <div className="bg-brand-graphite/20 border border-border rounded-[2rem] p-6 space-y-4">
             {groupBalances.length === 0 ? (
               <div className="text-center py-8 text-white/40">All settled up!</div>
             ) : (
               groupBalances.map((bal, i) => (
-                <div key={i} className="flex items-center justify-between p-4 bg-black/20 rounded-xl border border-white/5">
+                <div key={i} className="flex items-center justify-between p-4 bg-brand-black/20 rounded-xl border border-border/40">
                   <div className="flex flex-col">
                     <span className="text-white font-medium">{bal.debtor} <span className="text-white/30 font-normal mx-1">owes</span> {bal.creditor}</span>
                   </div>
-                  <span className={`font-medium ${bal.isYouOwe ? 'text-red-400' : bal.isOwedToYou ? 'text-green-400' : 'text-white/70'}`}>
+                  <span className={`font-semibold ${bal.isYouOwe ? 'text-brand-cinnabar' : bal.isOwedToYou ? 'text-brand-porcelain' : 'text-white/70'}`}>
                     ₹{bal.amount.toFixed(2)}
                   </span>
                 </div>
@@ -190,18 +197,18 @@ export const GroupDetailsPage = () => {
           </div>
 
           <h2 className="text-3xl text-white mt-12" style={{ fontFamily: "'Instrument Serif', serif" }}>Members</h2>
-          <div className="bg-white/5 border border-white/10 rounded-[2rem] p-6 space-y-4">
+          <div className="bg-brand-graphite/20 border border-border rounded-[2rem] p-6 space-y-4">
             {group.group_members.map(m => (
               <div key={m.user_id} className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-white/50 text-sm overflow-hidden shrink-0">
-                  {m.profiles.avatar_url ? (
+                <div className="w-10 h-10 rounded-full bg-brand-graphite/30 flex items-center justify-center text-white/50 text-sm overflow-hidden shrink-0">
+                  {m.profiles?.avatar_url ? (
                     <img src={m.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
                   ) : (
-                    (m.profiles.display_name || m.profiles.full_name || m.profiles.email || 'U')[0].toUpperCase()
+                    (m.profiles?.display_name || m.profiles?.full_name || m.profiles?.email || 'U')[0].toUpperCase()
                   )}
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-white">{m.profiles.display_name || m.profiles.full_name || m.profiles.email} {m.user_id === user.id && '(You)'}</span>
+                  <span className="text-white">{m.profiles?.display_name || m.profiles?.full_name || m.profiles?.email || 'Unknown'} {m.user_id === user.id && '(You)'}</span>
                   <span className="text-white/30 text-xs capitalize">{m.role}</span>
                 </div>
               </div>

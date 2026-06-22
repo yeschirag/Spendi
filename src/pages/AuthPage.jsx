@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
@@ -46,34 +46,72 @@ export const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#000000] flex flex-col justify-center py-12 sm:px-6 lg:px-8 font-body selection:bg-white/20">
-      
-      <div className="absolute top-8 left-8">
-         <Link to="/" className="flex items-center gap-3">
-           <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain filter invert brightness-0" />
-           <span className="text-2xl text-white tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>Spendi</span>
-         </Link>
+    <div className="min-h-screen bg-[#000000] flex font-body selection:bg-white/20 relative overflow-hidden">
+      {/* Left Side: Artwork (Editorial visual) */}
+      <div className="relative hidden lg:flex lg:w-1/2 bg-[#F3F3F1] overflow-hidden flex-col justify-between p-16">
+        {/* Background Artwork */}
+        <div className="absolute inset-0 z-0">
+          <img 
+            src="/auth_artwork.png" 
+            alt="Editorial artwork" 
+            className="w-full h-full object-cover opacity-90 select-none pointer-events-none transition-transform duration-[10000ms] ease-out hover:scale-105" 
+          />
+          {/* Subtle gradient overlay to tie the artwork back to the editorial feel */}
+          <div className="absolute inset-0 bg-gradient-to-tr from-[#F3F3F1]/80 via-transparent to-transparent"></div>
+        </div>
+
+        {/* Brand Header */}
+        <div className="relative z-10">
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain filter brightness-0" />
+            <span className="text-3xl text-black tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>Spendi</span>
+          </Link>
+        </div>
+
+        {/* Footer Typography */}
+        <div className="relative z-10 max-w-md">
+          <h3 className="text-4xl text-black leading-tight mb-4 font-normal" style={{ fontFamily: "'Instrument Serif', serif" }}>
+            The art of tracking. <br />
+            <span className="text-black/50">The beauty of clarity.</span>
+          </h3>
+          <p className="text-sm text-black/60 leading-relaxed font-light" style={{ fontFamily: "'Inter', sans-serif" }}>
+            A digital workspace crafted for smart spenders, savers, and thinkers. Organize your balances and splits in a pure, unadulterated interface.
+          </p>
+        </div>
       </div>
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
-        <h2 className="mt-6 text-center text-6xl text-white font-normal" style={{ fontFamily: "'Instrument Serif', serif", letterSpacing: '-1px' }}>
-          {isLogin ? 'Welcome back.' : 'Begin your journey.'}
-        </h2>
-      </div>
+      {/* Right Side: Authentication Form */}
+      <div className="w-full lg:w-1/2 flex flex-col justify-center px-6 sm:px-16 lg:px-24 py-16 relative z-10 bg-brand-black">
+        
+        {/* Mobile Header: Visible only on smaller screens */}
+        <div className="lg:hidden absolute top-8 left-8">
+          <Link to="/" className="flex items-center gap-3">
+            <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain filter invert" />
+            <span className="text-2xl text-white tracking-tight" style={{ fontFamily: "'Instrument Serif', serif" }}>Spendi</span>
+          </Link>
+        </div>
 
-      <div className="mt-12 sm:mx-auto sm:w-full sm:max-w-md z-10">
-        <div className="bg-[#0A0A0A] py-10 px-6 sm:rounded-[2rem] sm:px-12 border border-white/5 shadow-2xl relative overflow-hidden group">
-          <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"></div>
-          
+        <div className="w-full max-w-md mx-auto">
+          {/* Form Header */}
+          <div className="mb-10 text-left">
+            <h2 className="text-4xl sm:text-5xl text-white font-normal leading-tight" style={{ fontFamily: "'Instrument Serif', serif", letterSpacing: '-0.5px' }}>
+              {isLogin ? 'Welcome back.' : 'Begin your journey.'}
+            </h2>
+            <p className="mt-3 text-sm text-brand-charcoal" style={{ fontFamily: "'Inter', sans-serif" }}>
+              {isLogin ? 'Enter your details to access your dashboard' : 'Join a quiet space for smart financial tracking'}
+            </p>
+          </div>
+
           {error && (
-            <div className="bg-red-500/10 text-red-400 text-sm p-4 rounded-xl border border-red-500/20 mb-8" style={{ fontFamily: "'Inter', sans-serif" }}>
+            <div className="bg-brand-cinnabar/10 text-brand-cinnabar text-sm p-4 rounded-xl border border-brand-cinnabar/25 mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
               {error}
             </div>
           )}
 
+          {/* Social Sign In */}
           <button 
             onClick={handleGoogleSignIn}
-            className="w-full flex justify-center items-center gap-3 py-3.5 px-4 rounded-xl text-sm font-medium text-black bg-white hover:bg-white/90 transition-colors shadow-lg relative z-10"
+            className="w-full flex justify-center items-center gap-3 py-3.5 px-4 rounded-xl text-sm font-medium text-white bg-brand-graphite/35 hover:bg-brand-graphite/60 border border-border transition-all duration-300 shadow-md hover:scale-[1.01] active:scale-[0.99]"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -85,57 +123,99 @@ export const AuthPage = () => {
             Continue with Google
           </button>
 
-          <div className="mt-8 mb-8 relative z-10">
+          {/* Divider */}
+          <div className="my-8 relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10"></div>
+              <div className="w-full border-t border-border"></div>
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-[#0A0A0A] text-white/40 tracking-wide uppercase text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>Or continue with email</span>
+            <div className="relative flex justify-center text-xs uppercase tracking-wider">
+              <span className="px-4 bg-brand-black text-brand-charcoal font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>Or use your email</span>
             </div>
           </div>
 
-          <form className="space-y-6 relative z-10" onSubmit={handleSubmit} style={{ fontFamily: "'Inter', sans-serif" }}>
+          {/* Form */}
+          <form className="space-y-5" onSubmit={handleSubmit} style={{ fontFamily: "'Inter', sans-serif" }}>
             {!isLogin && (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-white/70">Full Name</label>
+                  <label className="block text-xs font-semibold text-brand-charcoal uppercase tracking-wider">Full Name</label>
                   <div className="mt-2">
-                    <input type="text" required value={fullName} onChange={(e) => setFullName(e.target.value)} className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white focus:border-white sm:text-sm transition-all" placeholder="John Doe" />
+                    <input 
+                      type="text" 
+                      required 
+                      value={fullName} 
+                      onChange={(e) => setFullName(e.target.value)} 
+                      className="appearance-none block w-full px-4 py-3.5 bg-brand-black border border-border rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-brand-porcelain/40 focus:border-brand-porcelain sm:text-sm transition-all duration-200" 
+                      placeholder="John Doe" 
+                    />
                   </div>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-white/70">Phone Number (Optional)</label>
+                  <label className="block text-xs font-semibold text-brand-charcoal uppercase tracking-wider">Phone Number (Optional)</label>
                   <div className="mt-2">
-                    <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white focus:border-white sm:text-sm transition-all" placeholder="+91 9876543210" />
+                    <input 
+                      type="tel" 
+                      value={phone} 
+                      onChange={(e) => setPhone(e.target.value)} 
+                      className="appearance-none block w-full px-4 py-3.5 bg-brand-black border border-border rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-brand-porcelain/40 focus:border-brand-porcelain sm:text-sm transition-all duration-200" 
+                      placeholder="+91 9876543210" 
+                    />
                   </div>
                 </div>
               </>
             )}
             
             <div>
-              <label className="block text-sm font-medium text-white/70">Email address</label>
+              <label className="block text-xs font-semibold text-brand-charcoal uppercase tracking-wider">Email address</label>
               <div className="mt-2">
-                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white focus:border-white sm:text-sm transition-all" placeholder="you@example.com" />
+                <input 
+                  type="email" 
+                  required 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  className="appearance-none block w-full px-4 py-3.5 bg-brand-black border border-border rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-brand-porcelain/40 focus:border-brand-porcelain sm:text-sm transition-all duration-200" 
+                  placeholder="you@example.com" 
+                />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/70">Password</label>
+              <label className="block text-xs font-semibold text-brand-charcoal uppercase tracking-wider">Password</label>
               <div className="mt-2">
-                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} className="appearance-none block w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-white focus:border-white sm:text-sm transition-all" placeholder="••••••••" />
+                <input 
+                  type="password" 
+                  required 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  className="appearance-none block w-full px-4 py-3.5 bg-brand-black border border-border rounded-xl text-white placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-brand-porcelain/40 focus:border-brand-porcelain sm:text-sm transition-all duration-200" 
+                  placeholder="••••••••" 
+                />
               </div>
             </div>
 
-            <div className="pt-2">
-              <button type="submit" disabled={loading} className="w-full flex justify-center items-center gap-2 py-3.5 px-4 rounded-xl text-sm font-medium text-white bg-white/10 hover:bg-white/20 border border-white/10 transition-colors disabled:opacity-50">
+            <div className="pt-4">
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="w-full flex justify-center items-center gap-2 py-4 px-4 rounded-xl text-sm font-semibold text-brand-black bg-brand-porcelain hover:bg-brand-porcelain/90 active:scale-[0.99] transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none shadow-xl"
+              >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : (isLogin ? 'Sign in' : 'Create account')}
               </button>
             </div>
           </form>
 
-          <div className="mt-8 text-center relative z-10">
-            <button onClick={() => setIsLogin(!isLogin)} className="text-sm font-light text-white/50 hover:text-white transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+          {/* Toggle Login/Signup */}
+          <div className="mt-8 text-center">
+            <button 
+              onClick={() => setIsLogin(!isLogin)} 
+              className="text-sm font-light text-brand-charcoal hover:text-brand-porcelain transition-colors duration-200"
+              style={{ fontFamily: "'Inter', sans-serif" }}
+            >
+              {isLogin ? (
+                <>Don't have an account? <span className="text-brand-porcelain hover:underline">Sign up</span></>
+              ) : (
+                <>Already have an account? <span className="text-brand-porcelain hover:underline">Sign in</span></>
+              )}
             </button>
           </div>
         </div>

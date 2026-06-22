@@ -12,7 +12,7 @@ export const BottomNav = () => {
 
   return (
     <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-6 pt-2 pointer-events-none">
-      <div className="relative flex items-center justify-between px-6 py-4 bg-[#111111]/90 backdrop-blur-xl border border-white/10 rounded-full shadow-2xl shadow-black/80 pointer-events-auto max-w-sm mx-auto">
+      <div className="relative flex items-center justify-between px-6 py-4 bg-brand-black/90 backdrop-blur-xl border border-border rounded-full shadow-2xl shadow-black/80 pointer-events-auto max-w-sm mx-auto">
         
         {/* Dashboard */}
         <NavLink 
@@ -37,7 +37,7 @@ export const BottomNav = () => {
         {/* Add Expense */}
         <button
           onClick={() => navigate('/add-expense')}
-          className="tour-add-expense flex items-center justify-center w-12 h-12 bg-white text-black rounded-full hover:scale-105 transition-transform shadow-lg mx-2"
+          className="tour-add-expense flex items-center justify-center w-12 h-12 bg-brand-porcelain text-brand-black rounded-full hover:scale-105 transition-transform shadow-lg mx-2"
         >
           <Plus size={24} strokeWidth={2.5} />
         </button>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Receipt, Search, SlidersHorizontal } from 'lucide-react';
@@ -58,7 +58,7 @@ export const HistoryPage = () => {
         </button>
       </div>
 
-      <div className="mb-8 md:mb-10">
+      <div className="mb-8 md:mb-10 hidden md:block">
         <h1 className="text-5xl md:text-8xl text-white font-normal tracking-tight mb-4" style={{ fontFamily: "'Instrument Serif', serif" }}>
           The Ledger.
         </h1>
@@ -74,7 +74,7 @@ export const HistoryPage = () => {
             placeholder="Search expenses, categories, or people..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-white/5 border border-white/10 rounded-full py-3 pl-12 pr-6 text-white placeholder-white/40 focus:outline-none focus:border-white/30 transition-colors"
+            className="w-full bg-brand-graphite/20 border border-border rounded-full py-3 pl-12 pr-6 text-white placeholder-white/40 focus:outline-none focus:border-white/30 transition-colors"
             style={{ fontFamily: "'Inter', sans-serif" }}
           />
         </div>
@@ -84,11 +84,11 @@ export const HistoryPage = () => {
             <select 
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="w-full appearance-none bg-white/5 border border-white/10 rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer capitalize"
+              className="w-full appearance-none bg-brand-graphite/20 border border-border rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer capitalize"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               {uniqueCategories.map(cat => (
-                <option key={cat} value={cat} className="bg-black text-white capitalize">
+                <option key={cat} value={cat} className="bg-brand-black text-white capitalize">
                   {cat === 'all' ? 'All Categories' : cat}
                 </option>
               ))}
@@ -100,21 +100,21 @@ export const HistoryPage = () => {
             <select 
               value={sortOrder}
               onChange={(e) => setSortOrder(e.target.value)}
-              className="w-full appearance-none bg-white/5 border border-white/10 rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
+              className="w-full appearance-none bg-brand-graphite/20 border border-border rounded-full py-3 pl-6 pr-12 text-white focus:outline-none focus:border-white/30 transition-colors cursor-pointer"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              <option value="date-desc" className="bg-black text-white">Newest First</option>
-              <option value="date-asc" className="bg-black text-white">Oldest First</option>
-              <option value="amount-desc" className="bg-black text-white">Highest Amount</option>
-              <option value="amount-asc" className="bg-black text-white">Lowest Amount</option>
+              <option value="date-desc" className="bg-brand-black text-white">Newest First</option>
+              <option value="date-asc" className="bg-brand-black text-white">Oldest First</option>
+              <option value="amount-desc" className="bg-brand-black text-white">Highest Amount</option>
+              <option value="amount-asc" className="bg-brand-black text-white">Lowest Amount</option>
             </select>
             <SlidersHorizontal size={14} className="absolute right-5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none" />
           </div>
         </div>
       </div>
 
-      <div className="bg-white/5 border border-white/10 rounded-3xl p-6 md:p-12 shadow-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none"></div>
+      <div className="bg-brand-graphite/20 border border-border rounded-3xl p-6 md:p-12 shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-brand-graphite/10 to-transparent pointer-events-none"></div>
         
         <div className="relative z-10 flex flex-col gap-2">
           {filteredAndSortedExpenses.length === 0 ? (
@@ -125,7 +125,7 @@ export const HistoryPage = () => {
               </p>
               {expenses.length === 0 && (
                 <button 
-                  className="bg-white text-black px-8 py-3 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-xl"
+                  className="bg-brand-porcelain text-brand-black px-8 py-3 rounded-full text-sm font-medium hover:scale-[1.02] transition-transform shadow-xl"
                   onClick={() => navigate('/add-expense')}
                 >
                   Log your first expense
@@ -134,9 +134,9 @@ export const HistoryPage = () => {
             </div>
           ) : (
             filteredAndSortedExpenses.map((expense) => (
-              <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 mb-4 rounded-3xl bg-white/5 border border-white/5 hover:border-white/20 hover:bg-white/10 transition-all duration-300 cursor-pointer shadow-lg w-full max-w-full overflow-hidden">
+              <div key={expense.id} onClick={() => navigate(`/edit-expense/${expense.id}`)} className="relative group flex flex-col md:flex-row md:items-center justify-between p-4 md:p-6 mb-4 rounded-3xl bg-brand-graphite/25 border border-border/40 hover:border-border hover:bg-brand-graphite/45 transition-all duration-300 cursor-pointer shadow-lg w-full max-w-full overflow-hidden">
                 <div className="flex items-center gap-4 md:gap-6 flex-1 min-w-0 md:pr-8 w-full">
-                  <div className="hidden sm:flex w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-white/10 to-white/5 items-center justify-center border border-white/10 shadow-inner">
+                  <div className="hidden sm:flex w-14 h-14 md:w-16 md:h-16 shrink-0 rounded-2xl bg-gradient-to-br from-brand-graphite/40 to-brand-graphite/10 items-center justify-center border border-border shadow-inner">
                     <CategoryIcon slug={expense.category} className="text-white/80 w-6 h-6 md:w-8 md:h-8" />
                   </div>
                   <div className="flex-1 min-w-0 w-full">
@@ -158,7 +158,7 @@ export const HistoryPage = () => {
                   </div>
                   <button 
                     onClick={(e) => { e.stopPropagation(); navigate(`/edit-expense/${expense.id}`); }} 
-                    className="md:opacity-0 group-hover:opacity-100 transition-all duration-300 p-2.5 md:p-3 bg-white/5 hover:bg-white/20 rounded-full text-white/70 hover:text-white border border-white/10 shrink-0"
+                    className="md:opacity-0 group-hover:opacity-100 transition-all duration-300 p-2.5 md:p-3 bg-brand-graphite/30 hover:bg-brand-graphite/60 border border-border shrink-0"
                     title="Edit Expense"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>

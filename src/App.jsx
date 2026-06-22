@@ -98,6 +98,57 @@ const ProtectedRoute = ({ children }) => {
 };
 
 function App() {
+  useEffect(() => {
+    let audioUrl = null;
+    let audio = null;
+
+    // Prefetch the audio file to avoid browser cache/range-request restrictions
+    fetch('/mouse.mp3')
+      .then((res) => res.blob())
+      .then((blob) => {
+        audioUrl = URL.createObjectURL(blob);
+        audio = new Audio(audioUrl);
+        audio.volume = 0.2; // Keep it subtle and premium
+      })
+      .catch((err) => {
+        console.warn('Failed to load click audio blob, falling back to direct URL:', err);
+        // Fallback to direct path
+        audio = new Audio('/mouse.mp3');
+        audio.volume = 0.2;
+      });
+
+    const playClick = (e) => {
+      if (!audio) return;
+      const target = e.target;
+      if (!target) return;
+
+      // Only play on interactive elements for a professional user experience
+      const isInteractive = 
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'A' ||
+        target.closest('button') ||
+        target.closest('a') ||
+        target.closest('.cursor-pointer') ||
+        target.closest('[role="button"]') ||
+        (target.tagName === 'INPUT' && ['submit', 'button', 'checkbox', 'radio'].includes(target.type));
+
+      if (isInteractive) {
+        audio.currentTime = 0;
+        audio.play().catch((err) => {
+          console.debug('Audio play blocked:', err);
+        });
+      }
+    };
+
+    window.addEventListener('click', playClick);
+    return () => {
+      window.removeEventListener('click', playClick);
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, []);
+
   return (
     <AuthProvider>
       <FriendProvider>
